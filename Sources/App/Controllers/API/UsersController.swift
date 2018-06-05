@@ -56,7 +56,8 @@ private extension UsersController {
     
     /// Создание пользователя
     func createHandler(_ request: Request, user: User) throws -> Future<User.Public> {
-        return try User.query(on: request).filter(\.username == user.username).first().flatMap(to: User.Public.self) { existingUser in
+        let usernameFilter: ModelFilter<User> = try \.username == user.username
+        return User.query(on: request).filter(usernameFilter).first().flatMap(to: User.Public.self) { existingUser in
             guard existingUser == nil else { throw Abort(.badRequest, reason: "Another user already exists in the system with the same login name.") }
             
             let hasher = try request.make(BCryptDigest.self)

@@ -1,7 +1,7 @@
 import Vapor
 import Crypto
 import Authentication
-import FluentSQLite
+import FluentMySQL
 
 /// Токен
 final class Token: Codable {
@@ -51,16 +51,16 @@ extension Token {
 }
 
 
-// MARK: - SQLiteUUIDModel
+// MARK: - MySQLUUIDModel
 
-extension Token: SQLiteUUIDModel { }
+extension Token: MySQLUUIDModel { }
 
 
 // MARK: - Migration
 
 extension Token: Migration {
     
-    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             try builder.addReference(from: \.userID, to: \User.id)

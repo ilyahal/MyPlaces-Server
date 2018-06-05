@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 /// Работа с категориями
 struct CategoriesController: RouteCollection {
@@ -14,6 +15,8 @@ struct CategoriesController: RouteCollection {
         categoriesRoutes.get(use: getAllHandler)
         // Получение категории
         categoriesRoutes.get(Category.parameter, use: getHandler)
+        // Получение мест в категории
+        categoriesRoutes.get(Category.parameter, "places", use: getPlacesHandler)
         // Создание категории
         categoriesRoutes.post(Category.self, use: createHandler)
     }
@@ -33,6 +36,14 @@ private extension CategoriesController {
     /// Получение категории
     func getHandler(_ request: Request) throws -> Future<Category> {
         return try request.parameters.next(Category.self)
+    }
+    
+    /// Получение мест в категории
+    func getPlacesHandler(_ request: Request) throws -> Future<[Place]> {
+        return try request.parameters.next(Category.self).flatMap(to: [Place].self) { category in
+            let publicFilter: ModelFilter<Place> = try \.isPublic == true
+            return try category.places.query(on: request).filter(publicFilter).all()
+        }
     }
     
     /// Создание категории

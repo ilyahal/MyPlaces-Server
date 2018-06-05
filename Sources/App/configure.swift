@@ -1,13 +1,13 @@
 import Vapor
 import Authentication
-import FluentSQLite
+import FluentMySQL
 import Leaf
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ environment: inout Environment, _ services: inout Services) throws {
     
     // Register providers first
-    try services.register(FluentSQLiteProvider())
+    try services.register(FluentMySQLProvider())
     try services.register(LeafProvider())
     try services.register(AuthenticationProvider())
     
@@ -22,29 +22,26 @@ public func configure(_ config: inout Config, _ environment: inout Environment, 
     middlewares.use(SessionsMiddleware.self)
     services.register(middlewares)
     
-    // Configure a SQLite database
-    let sqlite: SQLiteDatabase
-    if environment.isRelease {
-        sqlite = try SQLiteDatabase(storage: .file(path: "db.sqlite"))
-    } else {
-        sqlite = try SQLiteDatabase(storage: .memory)
-    }
+    // Configure a MySQL database
+    let mysqlConfig = MySQLDatabaseConfig(hostname: "localhost", port: 3306, username: "admin", password: "123456", database: "myplaces")
+    let mysql = MySQLDatabase(config: mysqlConfig)
     
-    // Register the configured SQLite database to the database config.
+    // Register the configured MySQL database to the database config.
     var databases = DatabasesConfig()
-    databases.add(database: sqlite, as: .sqlite)
+    databases.add(database: mysql, as: .mysql)
     services.register(databases)
     
     // Configure migrations
     var migrations = MigrationConfig()
-    migrations.add(model: User.self, database: .sqlite)
-    migrations.add(model: Token.self, database: .sqlite)
-    migrations.add(model: List.self, database: .sqlite)
-    migrations.add(model: Place.self, database: .sqlite)
-    migrations.add(model: Category.self, database: .sqlite)
+    migrations.add(model: User.self, database: .mysql)
+    migrations.add(model: Token.self, database: .mysql)
+    migrations.add(model: List.self, database: .mysql)
+    migrations.add(model: Place.self, database: .mysql)
+    migrations.add(model: Category.self, database: .mysql)
+    migrations.add(model: PlaceCategoryPivot.self, database: .mysql)
     services.register(migrations)
     
-    User.Public.defaultDatabase = .sqlite
+    User.Public.defaultDatabase = .mysql
 
     // Register routes to the router
     let router = EngineRouter.default()

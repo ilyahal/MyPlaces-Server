@@ -13,5 +13,7 @@ struct PlaceData: Content {
     var longitude: Double
     /// Публичный
     var isPublic: Bool
+    /// Категории
+    var categories: [String]?
     
 }

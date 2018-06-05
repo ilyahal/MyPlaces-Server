@@ -1,5 +1,5 @@
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 /// Место
 final class Place: Codable {
@@ -58,19 +58,46 @@ extension Place {
         return parent(\.listID)
     }
     
+    /// Категории
+    var categories: Siblings<Place, Category, PlaceCategoryPivot> {
+        return siblings()
+    }
+    
 }
 
 
-// MARK: - SQLiteUUIDModel
+// MARK: - Публичные методы
 
-extension Place: SQLiteUUIDModel { }
+extension Place {
+    
+    /// Удалить место
+    static func deletePlace(_ place: Place, on request: Request) throws -> Future<Void> {
+        return try place.categories.query(on: request).all().flatMap(to: Void.self) { categories in
+            var deletes: [Future<Void>] = []
+            for category in categories {
+                let deletePivot = try PlaceCategoryPivot.deletePivot(for: place, with: category, on: request)
+                deletes.append(deletePivot)
+            }
+            
+            return deletes.flatten(on: request).flatMap(to: Void.self) {
+                return place.delete(on: request).transform(to: ())
+            }
+        }
+    }
+    
+}
+
+
+// MARK: - MySQLUUIDModel
+
+extension Place: MySQLUUIDModel { }
 
 
 // MARK: - Migration
 
 extension Place: Migration {
     
-    static func prepare(on connection: SQLiteConnection) -> Future<Void> {
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             try builder.addReference(from: \.userID, to: \User.id)

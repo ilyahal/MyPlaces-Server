@@ -1,5 +1,5 @@
 import Vapor
-import FluentSQLite
+import FluentMySQL
 
 extension User {
     
@@ -30,9 +30,9 @@ extension User {
 }
 
 
-// MARK: - SQLiteUUIDModel
+// MARK: - MySQLUUIDModel
 
-extension User.Public: SQLiteUUIDModel {
+extension User.Public: MySQLUUIDModel {
     
     static let entity = User.entity
     

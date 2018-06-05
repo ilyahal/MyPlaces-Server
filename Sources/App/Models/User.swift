@@ -1,6 +1,6 @@
 import Vapor
 import Authentication
-import FluentSQLite
+import FluentMySQL
 
 /// Пользователь
 final class User: Codable {
@@ -35,10 +35,12 @@ final class User: Codable {
 
 extension User {
     
+    /// Списки
     var lists: Children<User, List> {
         return children(\.userID)
     }
     
+    /// Места
     var places: Children<User, Place> {
         return children(\.userID)
     }
@@ -46,9 +48,9 @@ extension User {
 }
 
 
-// MARK: - SQLiteUUIDModel
+// MARK: - MySQLUUIDModel
 
-extension User: SQLiteUUIDModel { }
+extension User: MySQLUUIDModel { }
 
 
 // MARK: - Migration

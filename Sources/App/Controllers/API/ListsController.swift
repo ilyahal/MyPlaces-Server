@@ -78,18 +78,7 @@ private extension ListsController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            return try list.places.query(on: request).all().flatMap(to: HTTPStatus.self) { places in
-                var deleted: [Future<Void>] = []
-                for place in places {
-                    let deletePlace = place.delete(on: request)
-                    deleted.append(deletePlace)
-                }
-                
-                let deleteList = list.delete(on: request)
-                deleted.append(deleteList)
-                
-                return deleted.flatten(on: request).transform(to: .noContent)
-            }
+            return try List.deleteList(list, on: request).transform(to: .ok)
         }
     }
     
