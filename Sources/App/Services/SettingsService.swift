@@ -1,6 +1,6 @@
 import Vapor
 
-/// Настройкиы
+/// Настройки
 struct SettingsService: Service { }
 
 
@@ -26,6 +26,12 @@ extension SettingsService {
     /// Допустимые типы файлов
     var allowedContentType: [MediaType] {
         return [.jpeg, .png]
+    }
+    
+    /// URL к папке "files"
+    var filesUrl: URL {
+        guard let filesUrl = URL(string: "http://localhost:8080/files/") else { preconditionFailure() }
+        return filesUrl
     }
     
 }

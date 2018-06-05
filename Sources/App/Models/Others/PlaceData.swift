@@ -11,6 +11,8 @@ struct PlaceData: Content {
     let latitude: Double
     /// Долгота
     let longitude: Double
+    /// Название фотографии
+    let photoName: String?
     /// Публичный
     let isPublic: Bool
     /// Категории

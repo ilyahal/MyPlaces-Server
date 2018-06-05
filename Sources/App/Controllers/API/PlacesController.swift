@@ -73,7 +73,13 @@ private extension PlacesController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            let place = try Place(title: data.title, description: data.description, latitude: data.latitude, longitude: data.longitude, isPublic: data.isPublic, dateInsert: Date(), listID: list.requireID(), userID: user.requireID())
+            var photoUrl: URL? = nil
+            if let photoName = data.photoName {
+                let settingsService = try request.make(SettingsService.self)
+                photoUrl = settingsService.filesUrl.appendingPathComponent(photoName)
+            }
+            
+            let place = try Place(title: data.title, description: data.description, latitude: data.latitude, longitude: data.longitude, photoUrl: photoUrl?.absoluteString, isPublic: data.isPublic, dateInsert: Date(), listID: list.requireID(), userID: user.requireID())
             return place.save(on: request).flatMap(to: Place.self) { savedPlace in
                 var saves: [Future<Void>] = []
                 for category in data.categories ?? [] {
@@ -91,11 +97,18 @@ private extension PlacesController {
         return try request.parameters.next(Place.self).flatMap(to: Place.self) { place in
             let user = try request.requireAuthenticated(User.self)
             guard place.userID == user.id else { throw Abort(.forbidden) }
+            
+            var photoUrl: URL? = nil
+            if let photoName = data.photoName {
+                let settingsService = try request.make(SettingsService.self)
+                photoUrl = settingsService.filesUrl.appendingPathComponent(photoName)
+            }
 
             place.title = data.title
             place.description = data.description
             place.latitude = data.latitude
             place.longitude = data.longitude
+            place.photoUrl = photoUrl?.absoluteString
             place.isPublic = data.isPublic
             place.dateUpdate = Date()
 

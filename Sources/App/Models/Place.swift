@@ -16,6 +16,8 @@ final class Place: Codable {
     var latitude: Double
     /// Долгота
     var longitude: Double
+    /// URL фотографии
+    var photoUrl: String?
     /// Публичный
     var isPublic: Bool
     /// Дата добавления
@@ -30,11 +32,12 @@ final class Place: Codable {
     
     // MARK: - Инициализация
     
-    init(title: String, description: String?, latitude: Double, longitude: Double, isPublic: Bool, dateInsert: Date, listID: List.ID, userID: User.ID) {
+    init(title: String, description: String?, latitude: Double, longitude: Double, photoUrl: String?, isPublic: Bool, dateInsert: Date, listID: List.ID, userID: User.ID) {
         self.title = title
         self.description = description
         self.latitude = latitude
         self.longitude = longitude
+        self.photoUrl = photoUrl
         self.isPublic = isPublic
         self.dateInsert = dateInsert
         self.listID = listID
