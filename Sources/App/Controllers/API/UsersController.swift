@@ -96,9 +96,9 @@ private extension UsersController {
     }
     
     /// Деавторизация пользователя
-    func logoutHandler(_ request: Request) throws -> HTTPStatus {
-        try request.unauthenticate(User.self) // FIXME: Не работает деавторизация, открыл issue на github: https://github.com/vapor/auth/issues/45
-        return .ok
+    func logoutHandler(_ request: Request) throws -> Future<HTTPStatus> {
+        let token = try request.requireAuthenticated(Token.self)
+        return token.delete(on: request).transform(to: .ok)
     }
     
 }
