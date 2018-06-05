@@ -40,6 +40,7 @@ public func configure(_ config: inout Config, _ environment: inout Environment, 
     migrations.add(model: User.self, database: .sqlite)
     migrations.add(model: Token.self, database: .sqlite)
     migrations.add(model: List.self, database: .sqlite)
+    migrations.add(model: Place.self, database: .sqlite)
     services.register(migrations)
     
     User.Public.defaultDatabase = .sqlite

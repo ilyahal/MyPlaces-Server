@@ -39,6 +39,10 @@ extension User {
         return children(\.userID)
     }
     
+    var places: Children<User, Place> {
+        return children(\.userID)
+    }
+    
 }
 
 

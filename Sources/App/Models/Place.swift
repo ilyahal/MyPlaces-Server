@@ -1,8 +1,8 @@
 import Vapor
 import FluentSQLite
 
-/// Список мест
-final class List: Codable {
+/// Место
+final class Place: Codable {
     
     // MARK: - Публичные свойства
     
@@ -12,20 +12,32 @@ final class List: Codable {
     var title: String
     /// Описание
     var description: String?
+    /// Широта
+    var latitude: Double
+    /// Долгота
+    var longitude: Double
+    /// Публичный
+    var isPublic: Bool
     /// Дата добавления
     var dateInsert: Date
     /// Дата изменения
     var dateUpdate: Date?
+    /// Идентификатор списка
+    var listID: List.ID
     /// Идентификатор пользователя
     var userID: User.ID
     
     
     // MARK: - Инициализация
     
-    init(title: String, description: String?, dateInsert: Date, userID: User.ID) {
+    init(title: String, description: String?, latitude: Double, longitude: Double, isPublic: Bool, dateInsert: Date, listID: List.ID, userID: User.ID) {
         self.title = title
         self.description = description
+        self.latitude = latitude
+        self.longitude = longitude
+        self.isPublic = isPublic
         self.dateInsert = dateInsert
+        self.listID = listID
         self.userID = userID
     }
     
@@ -34,16 +46,16 @@ final class List: Codable {
 
 // MARK: - Публичные свойства
 
-extension List {
+extension Place {
     
     /// Пользователь
-    var user: Parent<List, User> {
+    var user: Parent<Place, User> {
         return parent(\.userID)
     }
     
-    /// Места
-    var places: Children<List, Place> {
-        return children(\.listID)
+    /// Список
+    var list: Parent<Place, List> {
+        return parent(\.listID)
     }
     
 }
@@ -51,17 +63,18 @@ extension List {
 
 // MARK: - SQLiteUUIDModel
 
-extension List: SQLiteUUIDModel { }
+extension Place: SQLiteUUIDModel { }
 
 
 // MARK: - Migration
 
-extension List: Migration {
+extension Place: Migration {
     
     static func prepare(on connection: SQLiteConnection) -> Future<Void> {
         return Database.create(self, on: connection) { builder in
             try addProperties(to: builder)
             try builder.addReference(from: \.userID, to: \User.id)
+            try builder.addReference(from: \.listID, to: \List.id)
         }
     }
     
@@ -70,9 +83,9 @@ extension List: Migration {
 
 // MARK: - Content
 
-extension List: Content { }
+extension Place: Content { }
 
 
 // MARK: - Parameter
 
-extension List: Parameter { }
+extension Place: Parameter { }

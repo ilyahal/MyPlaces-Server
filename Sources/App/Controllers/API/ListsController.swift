@@ -17,6 +17,8 @@ struct ListsController: RouteCollection {
         
         // Получение всех списков пользователя
         tokenAuthGroup.get(use: getAllHandler)
+        // Получение списка
+        tokenAuthGroup.get(List.parameter, use: getHandler)
         // Создание списка
         tokenAuthGroup.post(ListData.self, use: createHandler)
         // Изменение списка
@@ -36,6 +38,16 @@ private extension ListsController {
     func getAllHandler(_ request: Request) throws -> Future<[List]> {
         let user = try request.requireAuthenticated(User.self)
         return try user.lists.query(on: request).all() // TODO: Сортировка
+    }
+    
+    /// Получение списка
+    func getHandler(_ request: Request) throws -> Future<List> {
+        return try request.parameters.next(List.self).map(to: List.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            return list
+        }
     }
     
     /// Создание списка
@@ -66,7 +78,18 @@ private extension ListsController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            return list.delete(on: request).transform(to: .noContent)
+            return try list.places.query(on: request).all().flatMap(to: HTTPStatus.self) { places in
+                var deleted: [Future<Void>] = []
+                for place in places {
+                    let deletePlace = place.delete(on: request)
+                    deleted.append(deletePlace)
+                }
+                
+                let deleteList = list.delete(on: request)
+                deleted.append(deleteList)
+                
+                return deleted.flatten(on: request).transform(to: .noContent)
+            }
         }
     }
     

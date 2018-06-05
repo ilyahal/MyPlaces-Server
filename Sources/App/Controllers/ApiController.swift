@@ -17,6 +17,10 @@ struct ApiController: RouteCollection {
         // Работа со списками
         let listsController = ListsController()
         try apiRoutes.register(collection: listsController)
+        
+        // Работа с местами
+        let placesController = PlacesController()
+        try apiRoutes.register(collection: placesController)
     }
     
 }
