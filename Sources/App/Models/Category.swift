@@ -10,12 +10,15 @@ final class Category: Codable {
     var id: Int?
     /// Название
     var title: String
+    /// Дата добавления
+    var dateInsert: Date
     
     
     // MARK: - Инициализация
     
-    init(title: String) {
+    init(title: String, dateInsert: Date) {
         self.title = title
+        self.dateInsert = dateInsert
     }
     
 }
@@ -44,7 +47,7 @@ extension Category {
             if let existingCategory = category {
                 return try PlaceCategoryPivot.createPivot(for: place, with: existingCategory, on: request)
             } else {
-                let category = Category(title: title)
+                let category = Category(title: title, dateInsert: Date())
                 return category.save(on: request).flatMap(to: Void.self) { savedCategory in
                     return try PlaceCategoryPivot.createPivot(for: place, with: savedCategory, on: request)
                 }
