@@ -7,5 +7,7 @@ struct UserUpdateData: Content {
     let name: String
     /// Адрес электронной почты
     let email: String?
+    /// Название фотографии
+    let photoName: String?
     
 }

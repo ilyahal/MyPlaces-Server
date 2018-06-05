@@ -16,14 +16,17 @@ extension User {
         var username: String
         /// Адрес электронной почты
         var email: String?
+        /// URL фотографии
+        var photoUrl: String?
         
         
         // MARK: - Инициализация
         
-        init(name: String, username: String, email: String?) {
+        init(name: String, username: String, email: String?, photoUrl: String?) {
             self.name = name
             self.username = username
             self.email = email
+            self.photoUrl = photoUrl
         }
     }
     

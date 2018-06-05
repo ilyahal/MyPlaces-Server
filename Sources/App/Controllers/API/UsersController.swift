@@ -17,7 +17,7 @@ struct UsersController: RouteCollection {
         // Получение пользователя
         usersRoutes.get(User.Public.parameter, use: getHandler)
         // Создание пользователя
-        usersRoutes.post(User.self, use: createHandler)
+        usersRoutes.post(UserCreateData.self, use: createHandler)
         
         // Группа методов, защищенных входом по паролю
         let basicAuthMiddleware = User.basicAuthMiddleware(using: BCryptDigest())
@@ -55,14 +55,15 @@ private extension UsersController {
     }
     
     /// Создание пользователя
-    func createHandler(_ request: Request, user: User) throws -> Future<User.Public> {
-        let usernameFilter: ModelFilter<User> = try \.username == user.username
+    func createHandler(_ request: Request, data: UserCreateData) throws -> Future<User.Public> {
+        let usernameFilter: ModelFilter<User> = try \.username == data.username
         return User.query(on: request).filter(usernameFilter).first().flatMap(to: User.Public.self) { existingUser in
             guard existingUser == nil else { throw Abort(.badRequest, reason: "Another user already exists in the system with the same login name.") }
             
             let hasher = try request.make(BCryptDigest.self)
-            user.password = try hasher.hash(user.password)
+            let password = try hasher.hash(data.password)
             
+            let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
             return user.save(on: request).flatMap(to: User.Public.self) { user in
                 return try User.Public.find(user.requireID(), on: request).map(to: User.Public.self) { userPublic in
                     guard let userPublic = userPublic else { throw Abort(.internalServerError) }
@@ -84,8 +85,15 @@ private extension UsersController {
     func updateHandler(_ request: Request, data: UserUpdateData) throws -> Future<User.Public> {
         let user = try request.requireAuthenticated(User.self)
         
+        var photoUrl: URL? = nil
+        if let photoName = data.photoName {
+            let settingsService = try request.make(SettingsService.self)
+            photoUrl = settingsService.filesUrl.appendingPathComponent(photoName)
+        }
+        
         user.name = data.name
         user.email = data.email
+        user.photoUrl = photoUrl?.absoluteString
         
         return user.update(on: request).flatMap(to: User.Public.self) { user in
             return try User.Public.find(user.requireID(), on: request).map(to: User.Public.self) { userPublic in
