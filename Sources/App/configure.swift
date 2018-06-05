@@ -39,9 +39,14 @@ public func configure(_ config: inout Config, _ environment: inout Environment, 
     migrations.add(model: Place.self, database: .mysql)
     migrations.add(model: Category.self, database: .mysql)
     migrations.add(model: PlaceCategoryPivot.self, database: .mysql)
+    migrations.add(model: Image.self, database: .mysql)
     services.register(migrations)
     
     User.Public.defaultDatabase = .mysql
+    
+    // Register custom services
+    let settingsService = SettingsService()
+    services.register(settingsService)
 
     // Register routes to the router
     let router = EngineRouter.default()

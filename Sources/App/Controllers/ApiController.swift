@@ -25,6 +25,10 @@ struct ApiController: RouteCollection {
         // Работа с категориями
         let categoriesController = CategoriesController()
         try apiRoutes.register(collection: categoriesController)
+        
+        // Работа с изображениями
+        let imagesController = ImagesController()
+        try apiRoutes.register(collection: imagesController)
     }
     
 }

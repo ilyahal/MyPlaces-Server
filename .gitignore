@@ -3,4 +3,5 @@ Packages
 xcuserdata
 *.xcodeproj
 DerivedData/
+Public/files/
 .DS_Store
