@@ -31,6 +31,17 @@ final class User: Codable {
 }
 
 
+// MARK: - Публичные свойства
+
+extension User {
+    
+    var lists: Children<User, List> {
+        return children(\.userID)
+    }
+    
+}
+
+
 // MARK: - SQLiteUUIDModel
 
 extension User: SQLiteUUIDModel { }

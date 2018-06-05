@@ -13,6 +13,10 @@ struct ApiController: RouteCollection {
         // Работа с пользователями
         let usersController = UsersController()
         try apiRoutes.register(collection: usersController)
+        
+        // Работа со списками
+        let listsController = ListsController()
+        try apiRoutes.register(collection: listsController)
     }
     
 }
