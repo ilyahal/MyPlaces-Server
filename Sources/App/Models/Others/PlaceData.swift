@@ -4,16 +4,16 @@ import Vapor
 struct PlaceData: Content {
     
     /// Название
-    var title: String
+    let title: String
     /// Описание
-    var description: String?
+    let description: String?
     /// Широта
-    var latitude: Double
+    let latitude: Double
     /// Долгота
-    var longitude: Double
+    let longitude: Double
     /// Публичный
-    var isPublic: Bool
+    let isPublic: Bool
     /// Категории
-    var categories: [String]?
+    let categories: [String]?
     
 }

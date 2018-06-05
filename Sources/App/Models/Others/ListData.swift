@@ -4,8 +4,8 @@ import Vapor
 struct ListData: Content {
     
     /// Название
-    var title: String
+    let title: String
     /// Описание
-    var description: String?
+    let description: String?
     
 }

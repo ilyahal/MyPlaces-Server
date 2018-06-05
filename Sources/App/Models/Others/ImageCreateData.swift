@@ -4,6 +4,6 @@ import Vapor
 struct ImageCreateData: Content {
     
     /// Изображение
-    var file: File
+    let file: File
     
 }

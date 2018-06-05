@@ -4,6 +4,6 @@ import Vapor
 struct CategoryData: Content {
     
     /// Название
-    var title: String
+    let title: String
     
 }

@@ -4,8 +4,8 @@ import Vapor
 struct UserUpdateData: Content {
     
     /// Имя
-    var name: String
+    let name: String
     /// Адрес электронной почты
-    var email: String?
+    let email: String?
     
 }
