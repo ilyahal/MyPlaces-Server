@@ -48,6 +48,11 @@ struct WebsiteController: RouteCollection {
         
         // Страница со списком
         protectedRoutes.get("lists", List.parameter, use: listHandler)
+        
+        // Страница создания места
+        protectedRoutes.get("lists", List.parameter, "places", "create", use: createPlaceHandler)
+        // Обработчик формы создания места
+        protectedRoutes.post(PlaceWebsiteData.self, at: "lists", List.parameter, "places", "create", use: createPlacePostHandler)
     }
     
 }
@@ -165,6 +170,36 @@ private extension WebsiteController {
             return try list.places.query(on: request).all().flatMap(to: View.self) { places in
                 let context = ListContext(title: list.title, list: list, places: places)
                 return try request.view().render("list", context)
+            }
+        }
+    }
+    
+    /// Страница создания места
+    func createPlaceHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            let context = CreatePlaceContext(title: "Создание места", list: list)
+            return try request.view().render("createPlace", context)
+        }
+    }
+    
+    /// Обработчик формы создания места
+    func createPlacePostHandler(_ request: Request, data: PlaceWebsiteData) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            let place = try Place(title: data.title, description: data.description, latitude: data.latitude, longitude: data.longitude, photoUrl: nil, isPublic: data.isPublic != nil, dateInsert: Date(), listID: list.requireID(), userID: user.requireID())
+            return place.save(on: request).flatMap(to: Response.self) { savedPlace in
+                var saves: [Future<Void>] = []
+                for category in data.categories ?? [] {
+                    let savePivot = try Category.addCategory(category, to: savedPlace, on: request)
+                    saves.append(savePivot)
+                }
+                
+                return saves.flatten(on: request).transform(to: request.redirect(to: "/lists/\(savedPlace.listID)"))
             }
         }
     }
