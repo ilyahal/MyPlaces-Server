@@ -1,0 +1,13 @@
+.custom-form {
+    padding: 15px;
+}
+.custom-form .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+.custom-form .form-control:focus {
+    z-index: 2;
+}

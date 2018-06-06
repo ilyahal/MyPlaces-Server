@@ -1,4 +1,4 @@
-#set("data") {
+#set("content") {
     <form method="post" class="text-center bg-white rounded box-shadow form-signin">
         <h1 class="h3 mb-3 font-weight-normal">Вход</h1>
 
@@ -16,8 +16,4 @@
     </form>
 }
 
-#set("styles") {
-    <link href="/styles/authorization.css" rel="stylesheet">
-}
-
-#embed("base")
+#embed("baseAuth")

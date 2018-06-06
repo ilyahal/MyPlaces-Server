@@ -1,8 +1,16 @@
 #set("content") {
-    <h1 class="d-inline">#(list.title)</h1>
-    <div class="mt-2 mb-3 float-right">
-        <a role="button" class="btn btn-primary mr-1" href="/lists/#(list.id)/edit">Изменить</a>
-        <a role="button" class="btn btn-success" href="/places/create">+</a>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">#(list.title)</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1 class="d-inline">#(list.title)</h1>
+        <div class="mt-2 mb-3 float-right">
+            <a role="button" class="btn btn-primary mr-1" href="/lists/#(list.id)/edit">Изменить</a>
+            <a role="button" class="btn btn-success" href="/places/create">+</a>
+        </div>
     </div>
     #if(count(places) > 0) {
         <table class="table table-bordered bg-white">
@@ -29,8 +37,11 @@
             </tbody>
         </table>
     } else {
-        <h3>Нет мест.</h3>
+        <div class="jumbotron">
+            <h1 class="display-4">Еще нет сохраненных мест.</h1>
+            <p class="lead">Вы можете сохранить любое понравившееся вам место.</p>
+        </div>
     }
 }
 
-#embed("page")
+#embed("base")

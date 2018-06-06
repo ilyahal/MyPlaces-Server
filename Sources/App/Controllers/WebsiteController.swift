@@ -33,6 +33,11 @@ struct WebsiteController: RouteCollection {
         // Главная страница
         protectedRoutes.get(use: indexHandler)
         
+        // Страница создания списка
+        protectedRoutes.get("lists", "create", use: createListHandler)
+        // Обработчик формы создания списка
+        protectedRoutes.post(ListData.self, at: "lists", "create", use: createListPostHandler)
+        
         // Страница со списком
         protectedRoutes.get("lists", List.parameter, use: listHandler)
     }
@@ -92,6 +97,20 @@ private extension WebsiteController {
             let context = IndexContext(title: "Главная", lists: lists)
             return try request.view().render("index", context)
         }
+    }
+    
+    /// Страница создания списка
+    func createListHandler(_ request: Request) throws -> Future<View> {
+        let context = CreateListContext(title: "Создание списка")
+        return try request.view().render("createList", context)
+    }
+    
+    /// Обработчик формы создания списка
+    func createListPostHandler(_ request: Request, data: ListData) throws -> Future<Response> {
+        let user = try request.requireAuthenticated(User.self)
+        let list = try List(title: data.title, description: data.description, dateInsert: Date(), userID: user.requireID())
+        
+        return list.save(on: request).transform(to: request.redirect(to: "/"))
     }
     
     /// Страница со списком

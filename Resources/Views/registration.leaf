@@ -1,22 +1,22 @@
-#set("data") {
+#set("content") {
     <form method="post" class="text-center bg-white rounded box-shadow form-signin">
         <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
 
         <div class="form-group">
-            <label for="input-name" class="sr-only">ФИО</label>
-            <input type="text" name="name" class="form-control" id="input-name" placeholder="ФИО" required autofocus>
+            <label for="inputName" class="sr-only">ФИО</label>
+            <input type="text" name="name" class="form-control" id="inputName" placeholder="ФИО" required autofocus>
         </div>
         <div class="form-group">
-            <label for="input-email" class="sr-only">Email</label>
-            <input type="email" name="email" class="form-control" id="input-email" placeholder="Email" required>
+            <label for="inputEmail" class="sr-only">Email</label>
+            <input type="email" name="email" class="form-control" id="inputEmail" placeholder="Email" required>
         </div>
         <div class="form-group">
-            <label for="input-username" class="sr-only">Имя пользователя</label>
-            <input type="text" name="username" class="form-control" id="input-username" placeholder="Имя пользователя" required>
+            <label for="inputUsername" class="sr-only">Имя пользователя</label>
+            <input type="text" name="username" class="form-control" id="inputUsername" placeholder="Имя пользователя" required>
         </div>
         <div class="form-group">
-            <label for="input-password" class="sr-only">Пароль</label>
-            <input type="password" name="password" class="form-control" id="input-password" placeholder="Пароль" minlength="6" required>
+            <label for="inputPassword" class="sr-only">Пароль</label>
+            <input type="password" name="password" class="form-control" aria-describedby="passwordHelpBlock" id="inputPassword" placeholder="Пароль" minlength="6" required>
             <small id="passwordHelpBlock" class="form-text text-muted">
                 Минимальная длина 6 символов
             </small>
@@ -27,8 +27,4 @@
     </form>
 }
 
-#set("styles") {
-    <link href="/styles/authorization.css" rel="stylesheet">
-}
-
-#embed("base")
+#embed("baseAuth")

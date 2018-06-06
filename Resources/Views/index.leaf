@@ -1,6 +1,13 @@
 #set("content") {
-    <h1 class="d-inline">Списки</h1>
-    <a role="button" class="btn btn-success mt-2 mb-3 float-right" href="/lists/create">+</a>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Главная</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1 class="d-inline">Списки</h1>
+        <a role="button" class="btn btn-success mt-2 mb-3 float-right" href="/lists/create">+</a>
+    </div>
     #if(count(lists) > 0) {
         <table class="table table-bordered bg-white">
             <thead class="thead-light">
@@ -26,8 +33,11 @@
             </tbody>
         </table>
     } else {
-        <h3>Нет списков.</h3>
+        <div class="jumbotron">
+            <h1 class="display-4">Еще нет созданных списков.</h1>
+            <p class="lead">Вы можете создавать списки, для сохранения понравившихся мест.</p>
+        </div>
     }
 }
 
-#embed("page")
+#embed("base")
