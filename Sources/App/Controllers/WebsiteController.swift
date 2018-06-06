@@ -33,6 +33,9 @@ struct WebsiteController: RouteCollection {
         // Главная страница
         protectedRoutes.get(use: indexHandler)
         
+        // Обработчик формы удаления списка
+        protectedRoutes.post("lists", List.parameter, "delete", use: deleteListPostHandler)
+        
         // Страница создания списка
         protectedRoutes.get("lists", "create", use: createListHandler)
         // Обработчик формы создания списка
@@ -96,6 +99,16 @@ private extension WebsiteController {
         return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
             let context = IndexContext(title: "Главная", lists: lists)
             return try request.view().render("index", context)
+        }
+    }
+    
+    /// Обработчик формы удаления списка
+    func deleteListPostHandler(_ request: Request) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try List.deleteList(list, on: request).transform(to: request.redirect(to: "/"))
         }
     }
     
