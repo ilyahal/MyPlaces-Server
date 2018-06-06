@@ -2,12 +2,12 @@
     <h1 class="d-inline">Списки</h1>
     <a role="button" class="btn btn-primary mt-2 mb-3 float-right" href="/lists/create">+</a>
     #if(count(lists) > 0) {
-        <table class="table table-bordered table-hover bg-white">
+        <table class="table table-bordered bg-white">
             <thead class="thead-light">
                 <tr>
                     <th width="300px">Название</th>
                     <th>Описание</th>
-                    <th width="220px">Действия</th>
+                    <th width="222px">Действия</th>
                </tr>
             </thead>
             <tbody>
@@ -17,7 +17,7 @@
                         <td class="align-middle">#(list.description)</td>
                         <td>
                             <form method="post" action="/lists/#(list.id)/delete">
-                                <a role="button" class="btn btn-primary" href="/lists/#(list.id)/edit">Изменить</a>
+                                <a role="button" class="btn btn-primary mr-1" href="/lists/#(list.id)/edit">Изменить</a>
                                 <input class="btn btn-danger" type="submit" value="Удалить">
                             </form>
                         </td>
