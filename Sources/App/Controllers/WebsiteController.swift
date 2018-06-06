@@ -53,6 +53,9 @@ struct WebsiteController: RouteCollection {
         protectedRoutes.get("lists", List.parameter, "places", "create", use: createPlaceHandler)
         // Обработчик формы создания места
         protectedRoutes.post(PlaceWebsiteData.self, at: "lists", List.parameter, "places", "create", use: createPlacePostHandler)
+        
+        // Обработчик формы удаления места
+        protectedRoutes.post("lists", List.parameter, "places", Place.parameter, "delete", use: deletePlacePostHandler)
     }
     
 }
@@ -200,6 +203,20 @@ private extension WebsiteController {
                 }
                 
                 return saves.flatten(on: request).transform(to: request.redirect(to: "/lists/\(savedPlace.listID)"))
+            }
+        }
+    }
+    
+    /// Обработчик формы удаления места
+    func deletePlacePostHandler(_ request: Request) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            return try request.parameters.next(Place.self).flatMap(to: Response.self) { place in
+                guard place.listID == list.id else { throw Abort(.forbidden) }
+                
+                let user = try request.requireAuthenticated(User.self)
+                guard place.userID == user.id else { throw Abort(.forbidden) }
+                
+                return try Place.deletePlace(place, on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
             }
         }
     }
