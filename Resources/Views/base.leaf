@@ -23,7 +23,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item #if(title == "Главная"){active}">
+                <li class="nav-item #if(navActiveItemIndex == 1){active}">
                     <a href="/" class="nav-link">Главная</a>
                 </li>
             </ul>

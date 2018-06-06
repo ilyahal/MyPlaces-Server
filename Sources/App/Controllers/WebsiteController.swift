@@ -33,13 +33,18 @@ struct WebsiteController: RouteCollection {
         // Главная страница
         protectedRoutes.get(use: indexHandler)
         
-        // Обработчик формы удаления списка
-        protectedRoutes.post("lists", List.parameter, "delete", use: deleteListPostHandler)
-        
         // Страница создания списка
         protectedRoutes.get("lists", "create", use: createListHandler)
         // Обработчик формы создания списка
         protectedRoutes.post(ListData.self, at: "lists", "create", use: createListPostHandler)
+        
+        // Страница редактирования списка
+        protectedRoutes.get("lists", List.parameter, "edit", use: editListHandler)
+        // Обработчик формы редактирования списка
+        protectedRoutes.post(ListData.self, at: "lists", List.parameter, "edit", use: editListPostHandler)
+        
+        // Обработчик формы удаления списка
+        protectedRoutes.post("lists", List.parameter, "delete", use: deleteListPostHandler)
         
         // Страница со списком
         protectedRoutes.get("lists", List.parameter, use: listHandler)
@@ -97,18 +102,8 @@ private extension WebsiteController {
     func indexHandler(_ request: Request) throws -> Future<View> {
         let user = try request.requireAuthenticated(User.self)
         return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
-            let context = IndexContext(title: "Главная", lists: lists)
+            let context = IndexContext(title: "Главная", navActiveItemIndex: 1, lists: lists)
             return try request.view().render("index", context)
-        }
-    }
-    
-    /// Обработчик формы удаления списка
-    func deleteListPostHandler(_ request: Request) throws -> Future<Response> {
-        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
-            let user = try request.requireAuthenticated(User.self)
-            guard list.userID == user.id else { throw Abort(.forbidden) }
-            
-            return try List.deleteList(list, on: request).transform(to: request.redirect(to: "/"))
         }
     }
     
@@ -124,6 +119,41 @@ private extension WebsiteController {
         let list = try List(title: data.title, description: data.description, dateInsert: Date(), userID: user.requireID())
         
         return list.save(on: request).transform(to: request.redirect(to: "/"))
+    }
+    
+    /// Страница редактирования списка
+    func editListHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            let context = EditListContext(title: "Изменение списка", list: list)
+            return try request.view().render("editList", context)
+        }
+    }
+    
+    /// Обработчик формы редактирования списка
+    func editListPostHandler(_ request: Request, data: ListData) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            list.title = data.title
+            list.description = data.description
+            list.dateUpdate = Date()
+            
+            return list.save(on: request).transform(to: request.redirect(to: "/"))
+        }
+    }
+    
+    /// Обработчик формы удаления списка
+    func deleteListPostHandler(_ request: Request) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try List.deleteList(list, on: request).transform(to: request.redirect(to: "/"))
+        }
     }
     
     /// Страница со списком

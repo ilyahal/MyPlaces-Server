@@ -1,0 +1,24 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Изменение списка</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>Изменение списка</h1>
+    </div>
+    <form method="post" class="bg-white rounded box-shadow custom-form">
+        <div class="form-group">
+            <label for="listTitle">Название</label>
+            <input type="text" name="title" value="#(list.title)" class="form-control" id="listTitle" required>
+        </div>
+        <div class="form-group">
+            <label for="listDescription">Описание</label>
+            <input type="text" name="description" value="#(list.description)" class="form-control" id="listDescription">
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+}
+
+#embed("base")
