@@ -1,5 +1,5 @@
 #set("data") {
-    <form method="post" class="text-center form-signin">
+    <form method="post" class="text-center bg-white rounded box-shadow form-signin">
         <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
 
         <div class="form-group">
@@ -16,7 +16,10 @@
         </div>
         <div class="form-group">
             <label for="input-password" class="sr-only">Пароль</label>
-            <input type="password" name="password" class="form-control" id="input-password" placeholder="Пароль" required>
+            <input type="password" name="password" class="form-control" id="input-password" placeholder="Пароль" minlength="6" required>
+            <small id="passwordHelpBlock" class="form-text text-muted">
+                Минимальная длина 6 символов
+            </small>
         </div>
 
         <button type="submit" class="btn btn-lg btn-primary btn-block">Зарегистрироваться</button>
