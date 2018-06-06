@@ -14,7 +14,7 @@
     <!-- Title -->
     <title>#(title) | MyPlaces</title>
 </head>
-<body>
+<body class="bg-light">
     <!-- Data -->
     #get(data)
 

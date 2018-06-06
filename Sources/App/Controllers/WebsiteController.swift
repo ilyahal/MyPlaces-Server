@@ -27,11 +27,11 @@ struct WebsiteController: RouteCollection {
         let redirectMiddleware = RedirectMiddleware<User>(path: "/login")
         let protectedRoutes = authSessionRoutes.grouped(redirectMiddleware)
         
-        // Главная страница
-        protectedRoutes.get(use: indexHandler)
-        
         // Обработчик формы выхода
         protectedRoutes.post("logout", use: logoutHandler)
+        
+        // Главная страница
+        protectedRoutes.get(use: indexHandler)
     }
     
 }
@@ -76,16 +76,19 @@ private extension WebsiteController {
         }
     }
     
-    /// Главная страница
-    func indexHandler(_ request: Request) throws -> Future<View> {
-        let context = IndexContext(title: "Главная")
-        return try request.view().render("index", context)
-    }
-    
     /// Обработчик формы выхода
     func logoutHandler(_ request: Request) throws -> Response {
         try request.unauthenticateSession(User.self)
         return request.redirect(to: "/login")
+    }
+    
+    /// Главная страница
+    func indexHandler(_ request: Request) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
+            let context = IndexContext(title: "Главная", lists: lists)
+            return try request.view().render("index", context)
+        }
     }
     
 }

@@ -1,5 +1,33 @@
 #set("content") {
-    <h1>Hello, world!</h1>
+    <h1 class="d-inline">Списки</h1>
+    <a role="button" class="btn btn-primary mt-2 mb-3 float-right" href="/lists/create">+</a>
+    #if(count(lists) > 0) {
+        <table class="table table-bordered table-hover bg-white">
+            <thead class="thead-light">
+                <tr>
+                    <th width="300px">Название</th>
+                    <th>Описание</th>
+                    <th width="220px">Действия</th>
+               </tr>
+            </thead>
+            <tbody>
+                #for(list in lists) {
+                    <tr>
+                        <td class="align-middle"><a href="/lists/#(list.id)">#(list.title)</a></td>
+                        <td class="align-middle">#(list.description)</td>
+                        <td>
+                            <form method="post" action="/lists/#(list.id)/delete">
+                                <a role="button" class="btn btn-primary" href="/lists/#(list.id)/edit">Изменить</a>
+                                <input class="btn btn-danger" type="submit" value="Удалить">
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } else {
+        <h3>Нет списков.</h3>
+    }
 }
 
 #embed("page")
