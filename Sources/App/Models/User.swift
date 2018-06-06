@@ -48,6 +48,30 @@ extension User {
         return children(\.userID)
     }
     
+    /// Изображения
+    var images: Children<User, Image> {
+        return children(\.userID)
+    }
+    
+}
+
+
+// MARK: - Публичные методы
+
+extension User {
+    
+    /// Проверка на существование
+    static func checkExisting(withUsername username: String, on request: Request) throws -> Future<Bool> {
+        let usernameFilter: ModelFilter<User> = try \.username == username
+        return User.query(on: request).filter(usernameFilter).first().map(to: Bool.self) { $0 != nil }
+    }
+    
+    /// Создать пароль
+    static func createPassword(with source: String, on request: Request) throws -> String {
+        let hasher = try request.make(BCryptDigest.self)
+        return try hasher.hash(source)
+    }
+    
 }
 
 
@@ -88,3 +112,13 @@ extension User: TokenAuthenticatable {
     typealias TokenType = Token
     
 }
+
+
+// MARK: - PasswordAuthenticatable
+
+extension User: PasswordAuthenticatable { }
+
+
+// MARK: - SessionAuthenticatable
+
+extension User: SessionAuthenticatable { }

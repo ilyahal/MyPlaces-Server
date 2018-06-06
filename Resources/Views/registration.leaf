@@ -1,0 +1,31 @@
+#set("data") {
+    <form method="post" class="text-center form-signin">
+        <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
+
+        <div class="form-group">
+            <label for="input-name" class="sr-only">ФИО</label>
+            <input type="text" name="name" class="form-control" id="input-name" placeholder="ФИО" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="input-email" class="sr-only">Email</label>
+            <input type="email" name="email" class="form-control" id="input-email" placeholder="Email" required>
+        </div>
+        <div class="form-group">
+            <label for="input-username" class="sr-only">Имя пользователя</label>
+            <input type="text" name="username" class="form-control" id="input-username" placeholder="Имя пользователя" required>
+        </div>
+        <div class="form-group">
+            <label for="input-password" class="sr-only">Пароль</label>
+            <input type="password" name="password" class="form-control" id="input-password" placeholder="Пароль" required>
+        </div>
+
+        <button type="submit" class="btn btn-lg btn-primary btn-block">Зарегистрироваться</button>
+        <a role="button" class="btn btn-lg btn-outline-dark btn-block" href="/login">Вход</a>
+    </form>
+}
+
+#set("styles") {
+    <link href="/styles/authorization.css" rel="stylesheet">
+}
+
+#embed("base")

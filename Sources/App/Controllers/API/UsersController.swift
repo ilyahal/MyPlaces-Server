@@ -56,14 +56,12 @@ private extension UsersController {
     
     /// Создание пользователя
     func createHandler(_ request: Request, data: UserCreateData) throws -> Future<User.Public> {
-        let usernameFilter: ModelFilter<User> = try \.username == data.username
-        return User.query(on: request).filter(usernameFilter).first().flatMap(to: User.Public.self) { existingUser in
-            guard existingUser == nil else { throw Abort(.badRequest, reason: "Another user already exists in the system with the same login name.") }
+        return try User.checkExisting(withUsername: data.username, on: request).flatMap(to: User.Public.self) { exist in
+            guard !exist else { throw Abort(.badRequest) }
             
-            let hasher = try request.make(BCryptDigest.self)
-            let password = try hasher.hash(data.password)
-            
+            let password = try User.createPassword(with: data.password, on: request)
             let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
+            
             return user.save(on: request).flatMap(to: User.Public.self) { user in
                 return try User.Public.find(user.requireID(), on: request).map(to: User.Public.self) { userPublic in
                     guard let userPublic = userPublic else { throw Abort(.internalServerError) }
