@@ -11,6 +11,7 @@
                 </li>
             </ul>
             <form method="post" action="/logout" class="form-inline">
+                <a role="button" class="btn btn-light mr-2" href="/profile">Профиль</a>
                 <button class="btn btn-danger" type="submit">Выйти</button>
             </form>
         </div>
