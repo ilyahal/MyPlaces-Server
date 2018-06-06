@@ -1,6 +1,6 @@
 #set("content") {
     <h1 class="d-inline">Списки</h1>
-    <a role="button" class="btn btn-primary mt-2 mb-3 float-right" href="/lists/create">+</a>
+    <a role="button" class="btn btn-success mt-2 mb-3 float-right" href="/lists/create">+</a>
     #if(count(lists) > 0) {
         <table class="table table-bordered bg-white">
             <thead class="thead-light">

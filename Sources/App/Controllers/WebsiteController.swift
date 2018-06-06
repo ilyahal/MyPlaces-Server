@@ -32,6 +32,9 @@ struct WebsiteController: RouteCollection {
         
         // Главная страница
         protectedRoutes.get(use: indexHandler)
+        
+        // Страница со списком
+        protectedRoutes.get("lists", List.parameter, use: listHandler)
     }
     
 }
@@ -88,6 +91,19 @@ private extension WebsiteController {
         return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
             let context = IndexContext(title: "Главная", lists: lists)
             return try request.view().render("index", context)
+        }
+    }
+    
+    /// Страница со списком
+    func listHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
+            let user = try request.requireAuthenticated(User.self)
+            guard list.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try list.places.query(on: request).all().flatMap(to: View.self) { places in
+                let context = ListContext(title: list.title, list: list, places: places)
+                return try request.view().render("list", context)
+            }
         }
     }
     
