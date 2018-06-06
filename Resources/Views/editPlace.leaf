@@ -1,0 +1,56 @@
+#set("styles") {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" integrity="sha384-HIipfSYbpCkh5/1V87AWAeR5SUrNiewznrUrtNz1ux4uneLhsAKzv/0FnMbj3m6g" crossorigin="anonymous">
+}
+
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item"><a href="/lists/#(list.id)">#(list.title)</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Изменение места</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1 class="d-inline">Изменение места</h1>
+        <button class="btn btn-primary mt-2 mb-3 float-right" id="placeGetLocationButton">Определить геопозицию</button>
+    </div>
+    <form method="post" class="bg-white rounded box-shadow custom-form">
+        <div class="form-group">
+            <label for="placeTitle">Название</label>
+            <input type="text" name="title" value="#(place.title)" class="form-control" id="placeTitle" required autofocus>
+        </div>
+        <div class="form-group">
+            <label for="placeDescription">Описание</label>
+            <input type="text" name="description" value="#(place.description)" class="form-control" id="placeDescription">
+        </div>
+        <div class="form-group">
+            <label for="placeLatitude">Широта</label>
+            <input type="text" name="latitude" value="#(place.latitude)" class="form-control" id="placeLatitude" required>
+        </div>
+        <div class="form-group">
+            <label for="placeLongitude">Долгота</label>
+            <input type="text" name="longitude" value="#(place.longitude)" class="form-control" id="placeLongitude" required>
+        </div>
+        <div class="form-group">
+            <label for="placeCategories">Категории</label>
+            <select name="categories[]" class="form-control" id="placeCategories" placeholder="Категории" multiple="multiple">
+                #for(category in categories) {
+                    <option value="#(category.title)" selected="selected">#(category.title)</option>
+                }
+            </select>
+        </div>
+        <div class="form-check mb-3">
+            <input type="checkbox" name="isPublic" value="" class="form-check-input" id="placePublic" #if(place.isPublic){checked}>
+            <label class="form-check-label" for="placePublic">Доступно другим пользователям</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+}
+
+#set("scripts") {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js" integrity="sha384-222hzbb8Z8ZKe6pzP18nTSltQM3PdcAwxWKzGOKOIF+Y3bROr5n9zdQ8yTRHgQkQ" crossorigin="anonymous"></script>
+    <script src="/scripts/placeCategories.js"></script>
+    <script src="/scripts/placeGeolocation.js"></script>
+}
+
+#embed("base")

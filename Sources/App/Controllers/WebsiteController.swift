@@ -54,6 +54,11 @@ struct WebsiteController: RouteCollection {
         // Обработчик формы создания места
         protectedRoutes.post(PlaceWebsiteData.self, at: "lists", List.parameter, "places", "create", use: createPlacePostHandler)
         
+        // Страница редактирования места
+        protectedRoutes.get("lists", List.parameter, "places", Place.parameter, "edit", use: editPlaceHandler)
+        // Обработчик формы редактирования места
+        protectedRoutes.post(PlaceWebsiteData.self, at: "lists", List.parameter, "places", Place.parameter, "edit", use: editPlacePostHandler)
+        
         // Обработчик формы удаления места
         protectedRoutes.post("lists", List.parameter, "places", Place.parameter, "delete", use: deletePlacePostHandler)
     }
@@ -203,6 +208,68 @@ private extension WebsiteController {
                 }
                 
                 return saves.flatten(on: request).transform(to: request.redirect(to: "/lists/\(savedPlace.listID)"))
+            }
+        }
+    }
+    
+    /// Страница редактирования места
+    func editPlaceHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
+            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
+                guard place.listID == list.id else { throw Abort(.forbidden) }
+                
+                let user = try request.requireAuthenticated(User.self)
+                guard place.userID == user.id else { throw Abort(.forbidden) }
+                
+                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                    let context = EditPlaceContext(title: "Изменение места", list: list, place: place, categories: categories)
+                    return try request.view().render("editPlace", context)
+                }
+            }
+        }
+    }
+    
+    /// Обработчик формы редактирования места
+    func editPlacePostHandler(_ request: Request, data: PlaceWebsiteData) throws -> Future<Response> {
+        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
+            return try request.parameters.next(Place.self).flatMap(to: Response.self) { place in
+                guard place.listID == list.id else { throw Abort(.forbidden) }
+                
+                let user = try request.requireAuthenticated(User.self)
+                guard place.userID == user.id else { throw Abort(.forbidden) }
+                
+                place.title = data.title
+                place.description = data.description
+                place.latitude = data.latitude
+                place.longitude = data.longitude
+                place.isPublic = data.isPublic != nil
+                place.dateUpdate = Date()
+                
+                return place.save(on: request).flatMap(to: Response.self) { savedPlace in
+                    return try savedPlace.categories.query(on: request).all().flatMap(to: Response.self) { existingCategories in
+                        let existingCategoriesTitles = Set<String>(existingCategories.map { $0.title })
+                        let newCategoriesTitles = Set<String>(data.categories ?? [])
+                        
+                        let categoriesToAdd = newCategoriesTitles.subtracting(existingCategoriesTitles)
+                        let categoriesToRemove = existingCategoriesTitles.subtracting(newCategoriesTitles)
+                        
+                        var does: [Future<Void>] = []
+                        for newCategory in categoriesToAdd {
+                            let savePivot = try Category.addCategory(newCategory, to: savedPlace, on: request)
+                            does.append(savePivot)
+                        }
+                        
+                        for categoryTitleToRemove in categoriesToRemove {
+                            let categoryToRemove = existingCategories.first { $0.title == categoryTitleToRemove }
+                            if let category = categoryToRemove {
+                                let deletePivot = try PlaceCategoryPivot.deletePivot(for: savedPlace, with: category, on: request)
+                                does.append(deletePivot)
+                            }
+                        }
+                        
+                        return does.flatten(on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
+                    }
+                }
             }
         }
     }
