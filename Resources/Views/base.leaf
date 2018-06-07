@@ -29,6 +29,9 @@
                 <li class="nav-item #if(navActiveItemIndex == 2){active}">
                     <a href="/categories" class="nav-link">Категории</a>
                 </li>
+                <li class="nav-item #if(navActiveItemIndex == 3){active}">
+                    <a href="/users" class="nav-link">Пользователи</a>
+                </li>
             </ul>
             <form method="post" action="/logout" class="form-inline">
                 <a role="button" class="btn btn-light mr-2" href="/profile">Профиль</a>

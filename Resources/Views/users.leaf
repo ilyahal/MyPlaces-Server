@@ -1,0 +1,29 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Пользователи</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>Пользователи</h1>
+    </div>
+    <table class="table table-bordered bg-white">
+        <thead class="thead-light">
+            <tr>
+                <th>Имя пользователя</th>
+                <th>ФИО</th>
+           </tr>
+        </thead>
+        <tbody>
+            #for(user in users) {
+                <tr>
+                    <td class="align-middle"><a href="/users/#(user.id)">#(user.username)</a></td>
+                    <td class="align-middle">#(user.name)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+#embed("base")
