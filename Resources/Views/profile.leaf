@@ -1,0 +1,23 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Профиль</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>#(user.username)</h1>
+    </div>
+    <form method="post" class="bg-white rounded box-shadow custom-form">
+        <div class="form-group">
+            <label for="inputName">ФИО</label>
+            <input type="text" name="name" value="#(user.name)" class="form-control" id="inputName" required>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail">Email</label>
+            <input type="email" name="email" value="#(user.email)" class="form-control" id="inputEmail" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+}
+
+#embed("base")

@@ -16,14 +16,14 @@ final class User: Codable {
     /// Пароль
     var password: String
     /// Адрес электронной почты
-    var email: String?
+    var email: String
     /// URL фотографии
     var photoUrl: String?
     
     
     // MARK: - Инициализация
     
-    init(name: String, username: String, password: String, email: String?, photoUrl: String?) {
+    init(name: String, username: String, password: String, email: String, photoUrl: String?) {
         self.name = name
         self.username = username
         self.password = password

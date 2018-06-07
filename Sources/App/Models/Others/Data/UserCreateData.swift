@@ -10,6 +10,6 @@ struct UserCreateData: Content {
     /// Пароль
     let password: String
     /// Адрес электронной почты
-    let email: String?
+    let email: String
     
 }

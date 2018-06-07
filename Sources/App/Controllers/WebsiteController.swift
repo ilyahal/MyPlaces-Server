@@ -73,6 +73,11 @@ struct WebsiteController: RouteCollection {
         
         // Страница места из категории
         protectedRoutes.get("categories", Category.parameter, "places", Place.parameter, use: categoryPlaceHandler)
+        
+        // Страница профиля
+        protectedRoutes.get("profile", use: profileHandler)
+        // Обработчик формы изменения профиля
+        protectedRoutes.post(UserUpdateData.self, at: "profile", use: profilePostHandler)
     }
     
 }
@@ -361,6 +366,24 @@ private extension WebsiteController {
                 }
             }
         }
+    }
+    
+    /// Страница профиля
+    func profileHandler(_ request: Request) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        let context = ProfileContext(title: "Профиль", user: user)
+        
+        return try request.view().render("profile", context)
+    }
+    
+    /// Обработчик формы изменения профиля
+    func profilePostHandler(_ request: Request, data: UserUpdateData) throws -> Future<Response> {
+        let user = try request.requireAuthenticated(User.self)
+        
+        user.name = data.name
+        user.email = data.email
+        
+        return user.save(on: request).transform(to: request.redirect(to: "/profile"))
     }
     
 }
