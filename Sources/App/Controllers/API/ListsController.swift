@@ -53,7 +53,9 @@ private extension ListsController {
     /// Создание списка
     func createHandler(_ request: Request, data: ListData) throws -> Future<List> {
         let user = try request.requireAuthenticated(User.self)
-        let list = try List(title: data.title, description: data.description, dateInsert: Date(), userID: user.requireID())
+        
+        let description = (data.description ?? "").isEmpty ? nil : data.description
+        let list = try List(title: data.title, description: description, dateInsert: Date(), userID: user.requireID())
         
         return list.save(on: request)
     }
@@ -65,7 +67,7 @@ private extension ListsController {
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
             list.title = data.title
-            list.description = data.description
+            list.description = (data.description ?? "").isEmpty ? nil : data.description
             list.dateUpdate = Date()
             
             return list.save(on: request)

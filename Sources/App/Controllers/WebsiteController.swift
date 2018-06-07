@@ -61,6 +61,9 @@ struct WebsiteController: RouteCollection {
         
         // Обработчик формы удаления места
         protectedRoutes.post("lists", List.parameter, "places", Place.parameter, "delete", use: deletePlacePostHandler)
+        
+        // Страница с местом
+        protectedRoutes.get("lists", List.parameter, "places", Place.parameter, use: placeHandler)
     }
     
 }
@@ -129,7 +132,9 @@ private extension WebsiteController {
     /// Обработчик формы создания списка
     func createListPostHandler(_ request: Request, data: ListData) throws -> Future<Response> {
         let user = try request.requireAuthenticated(User.self)
-        let list = try List(title: data.title, description: data.description, dateInsert: Date(), userID: user.requireID())
+        
+        let description = (data.description ?? "").isEmpty ? nil : data.description
+        let list = try List(title: data.title, description: description, dateInsert: Date(), userID: user.requireID())
         
         return list.save(on: request).transform(to: request.redirect(to: "/"))
     }
@@ -152,7 +157,7 @@ private extension WebsiteController {
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
             list.title = data.title
-            list.description = data.description
+            list.description = (data.description ?? "").isEmpty ? nil : data.description
             list.dateUpdate = Date()
             
             return list.save(on: request).transform(to: request.redirect(to: "/"))
@@ -199,7 +204,8 @@ private extension WebsiteController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            let place = try Place(title: data.title, description: data.description, latitude: data.latitude, longitude: data.longitude, photoUrl: nil, isPublic: data.isPublic != nil, dateInsert: Date(), listID: list.requireID(), userID: user.requireID())
+            let description = (data.description ?? "").isEmpty ? nil : data.description
+            let place = try Place(title: data.title, description: description, latitude: data.latitude, longitude: data.longitude, photoUrl: nil, isPublic: data.isPublic != nil, dateInsert: Date(), listID: list.requireID(), userID: user.requireID())
             return place.save(on: request).flatMap(to: Response.self) { savedPlace in
                 var saves: [Future<Void>] = []
                 for category in data.categories ?? [] {
@@ -239,7 +245,7 @@ private extension WebsiteController {
                 guard place.userID == user.id else { throw Abort(.forbidden) }
                 
                 place.title = data.title
-                place.description = data.description
+                place.description = (data.description ?? "").isEmpty ? nil : data.description
                 place.latitude = data.latitude
                 place.longitude = data.longitude
                 place.isPublic = data.isPublic != nil
@@ -284,6 +290,23 @@ private extension WebsiteController {
                 guard place.userID == user.id else { throw Abort(.forbidden) }
                 
                 return try Place.deletePlace(place, on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
+            }
+        }
+    }
+    
+    /// Страница с местом
+    func placeHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
+            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
+                guard place.listID == list.id else { throw Abort(.forbidden) }
+                
+                let user = try request.requireAuthenticated(User.self)
+                guard place.userID == user.id else { throw Abort(.forbidden) }
+                
+                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                    let context = PlaceContext(title: place.title, list: list, place: place, categories: categories)
+                    return try request.view().render("place", context)
+                }
             }
         }
     }
