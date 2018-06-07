@@ -64,6 +64,9 @@ struct WebsiteController: RouteCollection {
         
         // Страница с местом
         protectedRoutes.get("lists", List.parameter, "places", Place.parameter, use: placeHandler)
+        
+        // Страница с категориями
+        protectedRoutes.get("categories", use: categoriesHandler)
     }
     
 }
@@ -308,6 +311,14 @@ private extension WebsiteController {
                     return try request.view().render("place", context)
                 }
             }
+        }
+    }
+    
+    /// Страница с категориями
+    func categoriesHandler(_ request: Request) throws -> Future<View> {
+        return Category.query(on: request).all().flatMap(to: View.self) { categories in
+            let context = CategoriesContext(title: "Категории", navActiveItemIndex: 2, categories: categories)
+            return try request.view().render("categories", context)
         }
     }
     

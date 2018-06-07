@@ -1,0 +1,33 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Категории</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>Категории</h1>
+    </div>
+    #if(count(categories) > 0) {
+        <table class="table table-bordered bg-white">
+            <thead class="thead-light">
+                <tr>
+                    <th>Название</th>
+               </tr>
+            </thead>
+            <tbody>
+                #for(category in categories) {
+                    <tr>
+                        <td class="align-middle"><a href="/categories/#(category.id)">#(category.title)</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } else {
+        <div class="jumbotron">
+            <h1 class="display-4">Еще нет созданных категорий.</h1>
+            <p class="lead">Вы можете добавить категорию при сохранении места.</p>
+        </div>
+    }
+}
+
+#embed("base")
