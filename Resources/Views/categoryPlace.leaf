@@ -23,6 +23,7 @@
                 }
             </ul>
         }
+        <h5>Создано пользователем <a href="/users/#(user.id)/">#(user.name)</a></h5>
     </div>
 }
 

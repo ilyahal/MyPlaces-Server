@@ -287,7 +287,7 @@ private extension WebsiteController {
                             }
                         }
                         
-                        return does.flatten(on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
+                        return try does.flatten(on: request).transform(to: request.redirect(to: "/lists/\(place.listID)/places/\(place.requireID())"))
                     }
                 }
             }
@@ -361,8 +361,10 @@ private extension WebsiteController {
                 }
                 
                 return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                    let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories)
-                    return try request.view().render("categoryPlace", context)
+                    return try place.user.get(on: request).flatMap(to: View.self) { placeCreator in
+                        let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories, user: placeCreator)
+                        return try request.view().render("categoryPlace", context)
+                    }
                 }
             }
         }

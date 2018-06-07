@@ -11,5 +11,7 @@ struct CategoryPlaceContext: Context {
     let place: Place
     /// Категории
     let categories: [Category]
+    /// Пользователь
+    let user: User
     
 }
