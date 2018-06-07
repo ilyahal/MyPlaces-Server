@@ -80,6 +80,9 @@ struct WebsiteController: RouteCollection {
         // Страница пользователя
         protectedRoutes.get("users", User.parameter, use: userHandler)
         
+        // Страница места из категории
+        protectedRoutes.get("users", User.parameter, "places", Place.parameter, use: userPlaceHandler)
+        
         // Страница профиля
         protectedRoutes.get("profile", use: profileHandler)
         // Обработчик формы изменения профиля
@@ -401,6 +404,22 @@ private extension WebsiteController {
         let context = ProfileContext(title: "Профиль", user: user)
         
         return try request.view().render("profile", context)
+    }
+    
+    /// Страница места пользователя
+    func userPlaceHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(User.self).flatMap(to: View.self) { user in
+            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
+                if place.userID != user.id && !place.isPublic {
+                    throw Abort(.forbidden)
+                }
+                
+                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                    let context = UserPlaceContext(title: place.title, user: user, place: place, categories: categories)
+                    return try request.view().render("userPlace", context)
+                }
+            }
+        }
     }
     
     /// Обработчик формы изменения профиля

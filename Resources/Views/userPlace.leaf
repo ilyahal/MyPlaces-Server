@@ -1,0 +1,34 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item"><a href="/users">Пользователи</a></li>
+            <li class="breadcrumb-item"><a href="/users/#(user.id)">#(user.username)</a></li>
+            <li class="breadcrumb-item active" aria-current="page">#(place.title)</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>#(place.title)</h1>
+    </div>
+    <div class="rounded box-shadow mb-3" latitude="#(place.latitude)" longitude="#(place.longitude)" id="map"></div>
+    <div class="bg-white rounded box-shadow custom-form">
+        #if(place.description) {
+            <h4 class="text-muted">#(place.description)</h4>
+        }
+        #if(count(categories) > 0) {
+            <h3>Категории</h3>
+            <ul>
+                #for(category in categories) {
+                    <li><a href="/categories/#(category.id)">#(category.title)</a></li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+#set("scripts") {
+    <script src="http://api-maps.yandex.ru/2.1/?load=package.full&lang=ru-RU" type="text/javascript"></script>
+    <script src="/scripts/placeMap.js"></script>
+}
+
+#embed("base")
