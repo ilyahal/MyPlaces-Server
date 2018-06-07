@@ -77,6 +77,9 @@ struct WebsiteController: RouteCollection {
         // Страница с пользователями
         protectedRoutes.get("users", use: usersHandler)
         
+        // Страница пользователя
+        protectedRoutes.get("users", User.parameter, use: userHandler)
+        
         // Страница профиля
         protectedRoutes.get("profile", use: profileHandler)
         // Обработчик формы изменения профиля
@@ -378,6 +381,17 @@ private extension WebsiteController {
         return User.query(on: request).all().flatMap(to: View.self) { users in
             let context = UsersContext(title: "Пользователи", navActiveItemIndex: 3, users: users)
             return try request.view().render("users", context)
+        }
+    }
+    
+    /// Страница пользователя
+    func userHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(User.self).flatMap(to: View.self) { user in
+            let publicFilter: ModelFilter<Place> = try \.isPublic == true
+            return try user.places.query(on: request).filter(publicFilter).all().flatMap(to: View.self) { places in
+                    let context = UserContext(title: user.username, user: user, places: places)
+                    return try request.view().render("user", context)
+            }
         }
     }
     
