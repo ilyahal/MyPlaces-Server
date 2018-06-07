@@ -70,6 +70,9 @@ struct WebsiteController: RouteCollection {
         
         // Страница с местами из категории
         protectedRoutes.get("categories", Category.parameter, use: categoryHandler)
+        
+        // Страница места из категории
+        protectedRoutes.get("categories", Category.parameter, "places", Place.parameter, use: categoryPlaceHandler)
     }
     
 }
@@ -339,6 +342,23 @@ private extension WebsiteController {
             }.all().flatMap(to: View.self) { places in
                 let context = CategoryContext(title: category.title, category: category, places: places)
                 return try request.view().render("category", context)
+            }
+        }
+    }
+    
+    /// Страница места из категории
+    func categoryPlaceHandler(_ request: Request) throws -> Future<View> {
+        return try request.parameters.next(Category.self).flatMap(to: View.self) { category in
+            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
+                let user = try request.requireAuthenticated(User.self)
+                if place.userID != user.id && !place.isPublic {
+                    throw Abort(.forbidden)
+                }
+                
+                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                    let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories)
+                    return try request.view().render("categoryPlace", context)
+                }
             }
         }
     }
