@@ -1,0 +1,36 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/categories">Категории</a></li>
+            <li class="breadcrumb-item active" aria-current="page">#(category.title)</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1>#(category.title)</h1>
+    </div>
+    #if(count(places) > 0) {
+        <table class="table table-bordered bg-white">
+            <thead class="thead-light">
+                <tr>
+                    <th width="300px">Название</th>
+                    <th>Описание</th>
+               </tr>
+            </thead>
+            <tbody>
+                #for(place in places) {
+                    <tr>
+                        <td class="align-middle"><a href="/categories/#(category.id)/places/#(place.id)">#(place.title)</a></td>
+                        <td class="align-middle">#(place.description)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } else {
+        <div class="jumbotron">
+            <h1 class="display-4">В этой категории еще нет мест.</h1>
+            <p class="lead">Вы можете добавить к этой категории любое ваше место.</p>
+        </div>
+    }
+}
+
+#embed("base")
