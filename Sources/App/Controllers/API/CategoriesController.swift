@@ -15,10 +15,16 @@ struct CategoriesController: RouteCollection {
         categoriesRoutes.get(use: getAllHandler)
         // Получение категории
         categoriesRoutes.get(Category.parameter, use: getHandler)
-        // Получение мест в категории
-        categoriesRoutes.get(Category.parameter, "places", use: getPlacesHandler)
         // Создание категории
         categoriesRoutes.post(Category.self, use: createHandler)
+        
+        // Группа методов, защищенных входом по токену
+        let tokenAuthMiddleware = User.tokenAuthMiddleware()
+        let guardAuthMiddleware = User.guardAuthMiddleware()
+        let tokenAuthGroup = categoriesRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        
+        // Получение мест в категории
+        tokenAuthGroup.get(Category.parameter, "places", use: getPlacesHandler)
     }
 
 }
@@ -38,17 +44,24 @@ private extension CategoriesController {
         return try request.parameters.next(Category.self)
     }
     
-    /// Получение мест в категории
-    func getPlacesHandler(_ request: Request) throws -> Future<[Place]> {
-        return try request.parameters.next(Category.self).flatMap(to: [Place].self) { category in
-            let publicFilter: ModelFilter<Place> = try \.isPublic == true
-            return try category.places.query(on: request).filter(publicFilter).all()
-        }
-    }
-    
     /// Создание категории
     func createHandler(_ request: Request, category: Category) throws -> Future<Category> {
         return category.save(on: request)
+    }
+    
+    /// Получение мест в категории
+    func getPlacesHandler(_ request: Request) throws -> Future<[Place]> {
+        return try request.parameters.next(Category.self).flatMap(to: [Place].self) { category in
+            let user = try request.requireAuthenticated(User.self)
+            
+            let publicFilter: ModelFilter<Place> = try \.isPublic == true
+            let selfPlaceFilter: ModelFilter<Place> = try \.userID == user.id
+            
+            return try category.places.query(on: request).group(.or) { or in
+                or.filter(publicFilter)
+                or.filter(selfPlaceFilter)
+            }.all()
+        }
     }
     
 }

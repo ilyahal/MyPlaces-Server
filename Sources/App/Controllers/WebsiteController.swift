@@ -328,7 +328,15 @@ private extension WebsiteController {
     /// Страница с местами из категории
     func categoryHandler(_ request: Request) throws -> Future<View> {
         return try request.parameters.next(Category.self).flatMap(to: View.self) { category in
-            return try category.places.query(on: request).all().flatMap(to: View.self) { places in
+            let user = try request.requireAuthenticated(User.self)
+            
+            let publicFilter: ModelFilter<Place> = try \.isPublic == true
+            let selfPlaceFilter: ModelFilter<Place> = try \.userID == user.id
+            
+            return try category.places.query(on: request).group(.or) { or in
+                or.filter(publicFilter)
+                or.filter(selfPlaceFilter)
+            }.all().flatMap(to: View.self) { places in
                 let context = CategoryContext(title: category.title, category: category, places: places)
                 return try request.view().render("category", context)
             }
