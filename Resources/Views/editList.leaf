@@ -2,6 +2,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item"><a href="/lists/#(list.id)">#(list.title)</a></li>
             <li class="breadcrumb-item active" aria-current="page">Изменение списка</li>
         </ol>
     </nav>
