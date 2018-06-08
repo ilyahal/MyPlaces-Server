@@ -74,6 +74,8 @@ private extension UsersController {
     
     /// Редактирование информации о пользователе
     func updateHandler(_ request: Request, data: UserUpdateData) throws -> Future<User.Public> {
+        try data.validate()
+        
         let user = try request.requireAuthenticated(User.self)
         
         var photoUrl: URL? = nil

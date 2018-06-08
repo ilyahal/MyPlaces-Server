@@ -427,16 +427,6 @@ private extension WebsiteController {
         }
     }
     
-    /// Страница профиля
-    func profileHandler(_ request: Request) throws -> Future<View> {
-        let user = try request.requireAuthenticated(User.self)
-        
-        let context = ProfileContext(user: user)
-        let container = ContextContainer(title: "Профиль", data: context, on: request)
-        
-        return try request.view().render("profile", container)
-    }
-    
     /// Страница места пользователя
     func userPlaceHandler(_ request: Request) throws -> Future<View> {
         return try flatMap(to: View.self, request.parameters.next(User.self), request.parameters.next(Place.self)) { user, place in
@@ -453,8 +443,30 @@ private extension WebsiteController {
         }
     }
     
+    /// Страница профиля
+    func profileHandler(_ request: Request) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        
+        let name = request.query[String.self, at: "name"]
+        let email = request.query[String.self, at: "email"]
+        let profileError = request.query[Bool.self, at: "error"] ?? false
+        
+        let context = ProfileContext(user: user, name: name, email: email, profileError: profileError)
+        let container = ContextContainer(title: "Профиль", data: context, on: request)
+        
+        return try request.view().render("profile", container)
+    }
+    
     /// Обработчик формы изменения профиля
     func profilePostHandler(_ request: Request, data: UserUpdateData) throws -> Future<Response> {
+        do {
+            try data.validate()
+        } catch {
+            return Future.map(on: request) {
+                request.redirect(to: "/profile?name=\(data.name)&email=\(data.email)&error=true")
+            }
+        }
+        
         let user = try request.requireAuthenticated(User.self)
         
         user.name = data.name

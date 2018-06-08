@@ -6,5 +6,11 @@ struct ProfileContext: Context {
     
     /// Пользователь
     let user: User
+    /// Имя
+    let name: String?
+    /// Адрес электронной почты
+    let email: String?
+    /// Произошла ошибка
+    let profileError: Bool
     
 }
