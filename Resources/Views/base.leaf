@@ -49,14 +49,42 @@
             <div id="cookieMessage" class="container">
                 <div class="card">
                     <div class="card-body">
+                        <button type="button" class="close" aria-label="Close" onclick="cookiesClosed()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                         <h4 class="card-title">Мы используем файлы cookie для того, чтобы предоставить Вам больше возможностей при использовании сайта.</h4>
                         <p class="card-text">Продолжая просмотр страниц сайта, вы даете свое согласие на использование cookies.</p>
-                        <button type="button" class="btn btn-outline-dark" onclick="cookiesConfirmed()">Я согласен</button>
+                        <button type="button" class="btn btn-primary" onclick="cookiesConfirmed()">Я согласен</button>
+                        <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target=".bd-example-modal-lg">Больше информации</button>
                     </div>
                 </div>
             </div>
         </footer>
-        
+
+        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="сookieModalLabel" style="display: none;" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title h4" id="сookieModalLabel">Политика использования Cookie-файлов</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Наш Сайт использует cookie-файлы для того, чтобы отличить Вас от других пользователей нашего ресурса. Это позволяет обеспечивать удобный просмотр нашего Сайта, а также даёт возможность улучшать его. Для того чтобы продолжить работу с Сайтом, Вам необходимо принять использование cookie-файлов.
+                        <br><br>
+                        Cookies – это небольшие файлы, состоящие из букв и цифр, которые сохраняются Вашим браузером на жёсткий диск Вашего компьютера, если Вы соглашаетесь на их использование.
+                        <br><br>
+                        Пожалуйста, обратите внимание на то, что третьи лица (например, рекламные сети или провайдеры внешних услуг, таких как анализ веб-трафика) также могут использовать cookie-файлы. Этот процесс мы не контролируем. Эти cookie-файлы скорее всего являются аналитическими/техническими cookie-файлами или целевыми cookie-файлами.
+                        <br><br>
+                        Вы можете заблокировать cookie-файлы, активировав определённую настройку в Вашем браузере, что позволит Вам отказаться от установки всех или части cookie-файлов. Однако в случае блокировки cookie-файлов в интернет браузере (включая крайне необходимые cookie-файлы), Вы можете потерять доступ ко всем или нескольким разделам нашего Сайта.
+                        <br><br>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="cookiesConfirmed()">Я согласен</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="/scripts/cookieConsentNotice.js"></script>
     }
 
