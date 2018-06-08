@@ -11,7 +11,7 @@
         <a role="button" class="btn btn-primary mt-2 mb-3 float-right" href="/lists/#(data.list.id)/places/#(data.place.id)/edit">Изменить</a>
     </div>
     #if(data.place.isPublic) {
-        <div class="alert alert-primary" role="alert">
+        <div class="alert alert-info" role="alert">
             Данное место доступно другим пользователям.
         </div>
     }
