@@ -1,10 +1,14 @@
 #set("content") {
     <form method="post" class="text-center bg-white rounded box-shadow form-signin">
         <h1 class="h3 mb-3 font-weight-normal">Вход</h1>
-
+        #if(data.loginError) {
+            <div class="alert alert-danger" role="alert">
+                Произошла ошибка. Имя пользователя или пароль введены неверно.
+            </div>
+        }
         <div class="form-group">
             <label for="inputUsername" class="sr-only">Имя пользователя</label>
-            <input type="text" name="username" class="form-control" id="inputUsername" placeholder="Имя пользователя" required autofocus>
+            <input type="text" name="username" #if(data.username){value="#(data.username)"} class="form-control" id="inputUsername" placeholder="Имя пользователя" required autofocus>
         </div>
         <div class="form-group">
             <label for="inputPassword" class="sr-only">Пароль</label>

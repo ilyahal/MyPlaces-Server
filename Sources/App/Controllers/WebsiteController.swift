@@ -98,7 +98,10 @@ private extension WebsiteController {
     
     /// Страница авторизации
     func loginHandler(_ request: Request) throws -> Future<View> {
-        let context = LoginContext()
+        let username = request.query[String.self, at: "username"]
+        let loginError = request.query[Bool.self, at: "error"] ?? false
+        
+        let context = LoginContext(username: username, loginError: loginError)
         let container = ContextContainer(title: "Вход", data: context, on: request)
         
         return try request.view().render("login", container)
@@ -108,7 +111,7 @@ private extension WebsiteController {
     func loginPostHandler(_ request: Request, data: UserLoginData) throws -> Future<Response> {
         let verifier = try request.make(BCryptDigest.self)
         return User.authenticate(username: data.username, password: data.password, using: verifier, on: request).map(to: Response.self) { user in
-            guard let user = user else { return request.redirect(to: "/login") }
+            guard let user = user else { return request.redirect(to: "/login?username=\(data.username)&error=true") }
             
             try request.authenticateSession(user)
             return request.redirect(to: "/")
