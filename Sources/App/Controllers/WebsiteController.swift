@@ -131,7 +131,10 @@ private extension WebsiteController {
         let password = try BCrypt.hash(data.password)
         let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
         
-        return user.save(on: request).transform(to: request.redirect(to: "/login"))
+        return user.save(on: request).map(to: Response.self) { savedUser in
+            try request.authenticateSession(savedUser)
+            return request.redirect(to: "/")
+        }
     }
     
     /// Обработчик формы выхода
