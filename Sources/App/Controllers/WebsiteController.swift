@@ -148,7 +148,7 @@ private extension WebsiteController {
         let user = try request.requireAuthenticated(User.self)
         return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
             let context = IndexContext(lists: lists)
-            let container = ContextContainer(title: "Главная", navActiveItemIndex: 1, data: context, on: request)
+            let container = ContextContainer(title: "Главная", menuActiveItemIndex: 0, data: context, on: request)
             
             return try request.view().render("index", container)
         }
@@ -348,7 +348,7 @@ private extension WebsiteController {
     func categoriesHandler(_ request: Request) throws -> Future<View> {
         return Category.query(on: request).all().flatMap(to: View.self) { categories in
             let context = CategoriesContext(categories: categories)
-            let container = ContextContainer(title: "Категории", navActiveItemIndex: 2, data: context, on: request)
+            let container = ContextContainer(title: "Категории", menuActiveItemIndex: 1, data: context, on: request)
             
             return try request.view().render("categories", container)
         }
@@ -395,7 +395,7 @@ private extension WebsiteController {
     func usersHandler(_ request: Request) throws -> Future<View> {
         return User.query(on: request).all().flatMap(to: View.self) { users in
             let context = UsersContext(users: users)
-            let container = ContextContainer(title: "Пользователи", navActiveItemIndex: 3, data: context, on: request)
+            let container = ContextContainer(title: "Пользователи", menuActiveItemIndex: 2, data: context, on: request)
             
             return try request.view().render("users", container)
         }

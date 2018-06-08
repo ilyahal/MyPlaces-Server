@@ -23,13 +23,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item #if(navActiveItemIndex == 1){active}">
+                <li class="nav-item #if(menuActiveItemIndex == 0){active}">
                     <a href="/" class="nav-link">Главная</a>
                 </li>
-                <li class="nav-item #if(navActiveItemIndex == 2){active}">
+                <li class="nav-item #if(menuActiveItemIndex == 1){active}">
                     <a href="/categories" class="nav-link">Категории</a>
                 </li>
-                <li class="nav-item #if(navActiveItemIndex == 3){active}">
+                <li class="nav-item #if(menuActiveItemIndex == 2){active}">
                     <a href="/users" class="nav-link">Пользователи</a>
                 </li>
             </ul>

@@ -8,7 +8,7 @@ struct ContextContainer<T>: Context where T: Context {
     /// Название страницы
     let title: String
     /// Индекс активного элемента меню
-    let navActiveItemIndex: Int?
+    let menuActiveItemIndex: Int?
     /// Отображать информацию об использовании cookie
     let showCookieMessage: Bool
     /// Данные
@@ -17,9 +17,9 @@ struct ContextContainer<T>: Context where T: Context {
     
     // MARK: - Инициализация
     
-    init(title: String, navActiveItemIndex: Int? = nil, data: T?, on request: Request) {
+    init(title: String, menuActiveItemIndex: Int? = nil, data: T?, on request: Request) {
         self.title = title
-        self.navActiveItemIndex = navActiveItemIndex
+        self.menuActiveItemIndex = menuActiveItemIndex
         self.data = data
         
         let showCookieMessage = request.http.cookies["cookies-accepted"] == nil
