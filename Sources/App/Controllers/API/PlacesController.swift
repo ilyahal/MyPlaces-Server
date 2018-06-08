@@ -113,30 +113,28 @@ private extension PlacesController {
             place.isPublic = data.isPublic
             place.dateUpdate = Date()
 
-            return place.save(on: request).flatMap(to: Place.self) { savedPlace in
-                return try savedPlace.categories.query(on: request).all().flatMap(to: Place.self) { existingCategories in
-                    let existingCategoriesTitles = Set<String>(existingCategories.map { $0.title })
-                    let newCategoriesTitles = Set<String>(data.categories ?? [])
-                    
-                    let categoriesToAdd = newCategoriesTitles.subtracting(existingCategoriesTitles)
-                    let categoriesToRemove = existingCategoriesTitles.subtracting(newCategoriesTitles)
-                    
-                    var does: [Future<Void>] = []
-                    for newCategory in categoriesToAdd {
-                        let savePivot = try Category.addCategory(newCategory, to: savedPlace, on: request)
-                        does.append(savePivot)
-                    }
-                    
-                    for categoryTitleToRemove in categoriesToRemove {
-                        let categoryToRemove = existingCategories.first { $0.title == categoryTitleToRemove }
-                        if let category = categoryToRemove {
-                            let deletePivot = try PlaceCategoryPivot.deletePivot(for: savedPlace, with: category, on: request)
-                            does.append(deletePivot)
-                        }
-                    }
-                    
-                    return does.flatten(on: request).transform(to: savedPlace)
+            return try flatMap(to: Place.self, place.save(on: request), place.categories.query(on: request).all()) { savedPlace, existingCategories in
+                let existingCategoriesTitles = Set<String>(existingCategories.map { $0.title })
+                let newCategoriesTitles = Set<String>(data.categories ?? [])
+                
+                let categoriesToAdd = newCategoriesTitles.subtracting(existingCategoriesTitles)
+                let categoriesToRemove = existingCategoriesTitles.subtracting(newCategoriesTitles)
+                
+                var does: [Future<Void>] = []
+                for newCategory in categoriesToAdd {
+                    let savePivot = try Category.addCategory(newCategory, to: savedPlace, on: request)
+                    does.append(savePivot)
                 }
+                
+                for categoryTitleToRemove in categoriesToRemove {
+                    let categoryToRemove = existingCategories.first { $0.title == categoryTitleToRemove }
+                    if let category = categoryToRemove {
+                        let deletePivot = try PlaceCategoryPivot.deletePivot(for: savedPlace, with: category, on: request)
+                        does.append(deletePivot)
+                    }
+                }
+                
+                return does.flatten(on: request).transform(to: savedPlace)
             }
         }
     }

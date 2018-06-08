@@ -60,16 +60,9 @@ extension User {
 
 extension User {
     
-    /// Проверка на существование
-    static func checkExisting(withUsername username: String, on request: Request) throws -> Future<Bool> {
-        let usernameFilter: ModelFilter<User> = try \.username == username
-        return User.query(on: request).filter(usernameFilter).first().map(to: Bool.self) { $0 != nil }
-    }
-    
-    /// Создать пароль
-    static func createPassword(with source: String, on request: Request) throws -> String {
-        let hasher = try request.make(BCryptDigest.self)
-        return try hasher.hash(source)
+    /// Преобразовать в публичную версию
+    func convertToPublic() -> User.Public {
+        return User.Public(id: self.id, name: self.name, username: self.username, email: self.email, photoUrl: self.photoUrl)
     }
     
 }
@@ -82,7 +75,16 @@ extension User: MySQLUUIDModel { }
 
 // MARK: - Migration
 
-extension User: Migration { }
+extension User: Migration {
+    
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            try builder.addIndex(to: \.username, isUnique: true)
+        }
+    }
+    
+}
 
 
 // MARK: - Content

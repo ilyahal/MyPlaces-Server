@@ -121,14 +121,10 @@ private extension WebsiteController {
     
     /// Обработчик страницы регистрации
     func registrationPostHandler(_ request: Request, data: UserCreateData) throws -> Future<Response> {
-        return try User.checkExisting(withUsername: data.username, on: request).flatMap(to: Response.self) { exist in
-            guard !exist else { throw Abort(.badRequest) }
-            
-            let password = try User.createPassword(with: data.password, on: request)
-            let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
-            
-            return user.save(on: request).transform(to: request.redirect(to: "/login"))
-        }
+        let password = try BCrypt.hash(data.password)
+        let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
+        
+        return user.save(on: request).transform(to: request.redirect(to: "/login"))
     }
     
     /// Обработчик формы выхода
@@ -243,93 +239,83 @@ private extension WebsiteController {
     
     /// Страница редактирования места
     func editPlaceHandler(_ request: Request) throws -> Future<View> {
-        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
-            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
-                guard place.listID == list.id else { throw Abort(.forbidden) }
-                
-                let user = try request.requireAuthenticated(User.self)
-                guard place.userID == user.id else { throw Abort(.forbidden) }
-                
-                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                    let context = EditPlaceContext(title: "Изменение места", list: list, place: place, categories: categories)
-                    return try request.view().render("editPlace", context)
-                }
+        return try flatMap(to: View.self, request.parameters.next(List.self), request.parameters.next(Place.self)) { list, place in
+            guard place.listID == list.id else { throw Abort(.forbidden) }
+            
+            let user = try request.requireAuthenticated(User.self)
+            guard place.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                let context = EditPlaceContext(title: "Изменение места", list: list, place: place, categories: categories)
+                return try request.view().render("editPlace", context)
             }
         }
     }
     
     /// Обработчик формы редактирования места
     func editPlacePostHandler(_ request: Request, data: PlaceWebsiteData) throws -> Future<Response> {
-        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
-            return try request.parameters.next(Place.self).flatMap(to: Response.self) { place in
-                guard place.listID == list.id else { throw Abort(.forbidden) }
+        return try flatMap(to: Response.self, request.parameters.next(List.self), request.parameters.next(Place.self)) { list, place in
+            guard place.listID == list.id else { throw Abort(.forbidden) }
+            
+            let user = try request.requireAuthenticated(User.self)
+            guard place.userID == user.id else { throw Abort(.forbidden) }
+            
+            place.title = data.title
+            place.description = (data.description ?? "").isEmpty ? nil : data.description
+            place.latitude = data.latitude
+            place.longitude = data.longitude
+            place.isPublic = data.isPublic != nil
+            place.dateUpdate = Date()
+            
+            return try flatMap(to: Response.self, place.save(on: request), place.categories.query(on: request).all()) { savedPlace, existingCategories in
+                let existingCategoriesTitles = Set<String>(existingCategories.map { $0.title })
+                let newCategoriesTitles = Set<String>(data.categories ?? [])
                 
-                let user = try request.requireAuthenticated(User.self)
-                guard place.userID == user.id else { throw Abort(.forbidden) }
+                let categoriesToAdd = newCategoriesTitles.subtracting(existingCategoriesTitles)
+                let categoriesToRemove = existingCategoriesTitles.subtracting(newCategoriesTitles)
                 
-                place.title = data.title
-                place.description = (data.description ?? "").isEmpty ? nil : data.description
-                place.latitude = data.latitude
-                place.longitude = data.longitude
-                place.isPublic = data.isPublic != nil
-                place.dateUpdate = Date()
+                var does: [Future<Void>] = []
+                for newCategory in categoriesToAdd {
+                    let savePivot = try Category.addCategory(newCategory, to: savedPlace, on: request)
+                    does.append(savePivot)
+                }
                 
-                return place.save(on: request).flatMap(to: Response.self) { savedPlace in
-                    return try savedPlace.categories.query(on: request).all().flatMap(to: Response.self) { existingCategories in
-                        let existingCategoriesTitles = Set<String>(existingCategories.map { $0.title })
-                        let newCategoriesTitles = Set<String>(data.categories ?? [])
-                        
-                        let categoriesToAdd = newCategoriesTitles.subtracting(existingCategoriesTitles)
-                        let categoriesToRemove = existingCategoriesTitles.subtracting(newCategoriesTitles)
-                        
-                        var does: [Future<Void>] = []
-                        for newCategory in categoriesToAdd {
-                            let savePivot = try Category.addCategory(newCategory, to: savedPlace, on: request)
-                            does.append(savePivot)
-                        }
-                        
-                        for categoryTitleToRemove in categoriesToRemove {
-                            let categoryToRemove = existingCategories.first { $0.title == categoryTitleToRemove }
-                            if let category = categoryToRemove {
-                                let deletePivot = try PlaceCategoryPivot.deletePivot(for: savedPlace, with: category, on: request)
-                                does.append(deletePivot)
-                            }
-                        }
-                        
-                        return try does.flatten(on: request).transform(to: request.redirect(to: "/lists/\(place.listID)/places/\(place.requireID())"))
+                for categoryTitleToRemove in categoriesToRemove {
+                    let categoryToRemove = existingCategories.first { $0.title == categoryTitleToRemove }
+                    if let category = categoryToRemove {
+                        let deletePivot = try PlaceCategoryPivot.deletePivot(for: savedPlace, with: category, on: request)
+                        does.append(deletePivot)
                     }
                 }
+                
+                return try does.flatten(on: request).transform(to: request.redirect(to: "/lists/\(place.listID)/places/\(place.requireID())"))
             }
         }
     }
     
     /// Обработчик формы удаления места
     func deletePlacePostHandler(_ request: Request) throws -> Future<Response> {
-        return try request.parameters.next(List.self).flatMap(to: Response.self) { list in
-            return try request.parameters.next(Place.self).flatMap(to: Response.self) { place in
-                guard place.listID == list.id else { throw Abort(.forbidden) }
-                
-                let user = try request.requireAuthenticated(User.self)
-                guard place.userID == user.id else { throw Abort(.forbidden) }
-                
-                return try Place.deletePlace(place, on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
-            }
+        return try flatMap(to: Response.self, request.parameters.next(List.self), request.parameters.next(Place.self)) { list, place in
+            guard place.listID == list.id else { throw Abort(.forbidden) }
+            
+            let user = try request.requireAuthenticated(User.self)
+            guard place.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try Place.deletePlace(place, on: request).transform(to: request.redirect(to: "/lists/\(place.listID)"))
         }
     }
     
     /// Страница с местом
     func placeHandler(_ request: Request) throws -> Future<View> {
-        return try request.parameters.next(List.self).flatMap(to: View.self) { list in
-            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
-                guard place.listID == list.id else { throw Abort(.forbidden) }
-                
-                let user = try request.requireAuthenticated(User.self)
-                guard place.userID == user.id else { throw Abort(.forbidden) }
-                
-                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                    let context = PlaceContext(title: place.title, list: list, place: place, categories: categories)
-                    return try request.view().render("place", context)
-                }
+        return try flatMap(to: View.self, request.parameters.next(List.self), request.parameters.next(Place.self)) { list, place in
+            guard place.listID == list.id else { throw Abort(.forbidden) }
+            
+            let user = try request.requireAuthenticated(User.self)
+            guard place.userID == user.id else { throw Abort(.forbidden) }
+            
+            return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                let context = PlaceContext(title: place.title, list: list, place: place, categories: categories)
+                return try request.view().render("place", context)
             }
         }
     }
@@ -362,19 +348,15 @@ private extension WebsiteController {
     
     /// Страница места из категории
     func categoryPlaceHandler(_ request: Request) throws -> Future<View> {
-        return try request.parameters.next(Category.self).flatMap(to: View.self) { category in
-            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
-                let user = try request.requireAuthenticated(User.self)
-                if place.userID != user.id && !place.isPublic {
-                    throw Abort(.forbidden)
-                }
-                
-                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                    return try place.user.get(on: request).flatMap(to: View.self) { placeCreator in
-                        let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories, user: placeCreator)
-                        return try request.view().render("categoryPlace", context)
-                    }
-                }
+        return try flatMap(to: View.self, request.parameters.next(Category.self), request.parameters.next(Place.self)) { category, place in
+            let user = try request.requireAuthenticated(User.self)
+            if place.userID != user.id && !place.isPublic {
+                throw Abort(.forbidden)
+            }
+            
+            return try flatMap(to: View.self, place.categories.query(on: request).all(), place.user.get(on: request)) { categories, placeCreator in
+                let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories, user: placeCreator)
+                return try request.view().render("categoryPlace", context)
             }
         }
     }
@@ -392,8 +374,8 @@ private extension WebsiteController {
         return try request.parameters.next(User.self).flatMap(to: View.self) { user in
             let publicFilter: ModelFilter<Place> = try \.isPublic == true
             return try user.places.query(on: request).filter(publicFilter).all().flatMap(to: View.self) { places in
-                    let context = UserContext(title: user.username, user: user, places: places)
-                    return try request.view().render("user", context)
+                let context = UserContext(title: user.username, user: user, places: places)
+                return try request.view().render("user", context)
             }
         }
     }
@@ -408,16 +390,14 @@ private extension WebsiteController {
     
     /// Страница места пользователя
     func userPlaceHandler(_ request: Request) throws -> Future<View> {
-        return try request.parameters.next(User.self).flatMap(to: View.self) { user in
-            return try request.parameters.next(Place.self).flatMap(to: View.self) { place in
-                if place.userID != user.id && !place.isPublic {
-                    throw Abort(.forbidden)
-                }
-                
-                return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                    let context = UserPlaceContext(title: place.title, user: user, place: place, categories: categories)
-                    return try request.view().render("userPlace", context)
-                }
+        return try flatMap(to: View.self, request.parameters.next(User.self), request.parameters.next(Place.self)) { user, place in
+            if place.userID != user.id && !place.isPublic {
+                throw Abort(.forbidden)
+            }
+            
+            return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
+                let context = UserPlaceContext(title: place.title, user: user, place: place, categories: categories)
+                return try request.view().render("userPlace", context)
             }
         }
     }

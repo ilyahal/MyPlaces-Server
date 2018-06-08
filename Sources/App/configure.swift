@@ -42,8 +42,6 @@ public func configure(_ config: inout Config, _ environment: inout Environment, 
     migrations.add(model: Image.self, database: .mysql)
     services.register(migrations)
     
-    User.Public.defaultDatabase = .mysql
-    
     // Register custom services
     let settingsService = SettingsService()
     services.register(settingsService)

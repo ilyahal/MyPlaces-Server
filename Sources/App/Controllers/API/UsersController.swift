@@ -15,7 +15,7 @@ struct UsersController: RouteCollection {
         // Получение всех пользователей
         usersRoutes.get(use: getAllHandler)
         // Получение пользователя
-        usersRoutes.get(User.Public.parameter, use: getHandler)
+        usersRoutes.get(User.parameter, use: getHandler)
         // Создание пользователя
         usersRoutes.post(UserCreateData.self, use: createHandler)
         
@@ -46,29 +46,20 @@ private extension UsersController {
     
     /// Получение всех пользователей
     func getAllHandler(_ request: Request) throws -> Future<[User.Public]> {
-        return User.Public.query(on: request).all()
+        return User.query(on: request).decode(User.Public.self).all()
     }
     
     /// Получение пользователя
     func getHandler(_ request: Request) throws -> Future<User.Public> {
-        return try request.parameters.next(User.Public.self)
+        return try request.parameters.next(User.self).convertToPublic()
     }
     
     /// Создание пользователя
     func createHandler(_ request: Request, data: UserCreateData) throws -> Future<User.Public> {
-        return try User.checkExisting(withUsername: data.username, on: request).flatMap(to: User.Public.self) { exist in
-            guard !exist else { throw Abort(.badRequest) }
-            
-            let password = try User.createPassword(with: data.password, on: request)
-            let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
-            
-            return user.save(on: request).flatMap(to: User.Public.self) { user in
-                return try User.Public.find(user.requireID(), on: request).map(to: User.Public.self) { userPublic in
-                    guard let userPublic = userPublic else { throw Abort(.internalServerError) }
-                    return userPublic
-                }
-            }
-        }
+        let password = try BCrypt.hash(data.password)
+        let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
+        
+        return user.save(on: request).convertToPublic()
     }
     
     /// Авторизация пользователя
@@ -93,12 +84,7 @@ private extension UsersController {
         user.email = data.email
         user.photoUrl = photoUrl?.absoluteString
         
-        return user.update(on: request).flatMap(to: User.Public.self) { user in
-            return try User.Public.find(user.requireID(), on: request).map(to: User.Public.self) { userPublic in
-                guard let userPublic = userPublic else { throw Abort(.internalServerError) }
-                return userPublic
-            }
-        }
+        return user.update(on: request).convertToPublic()
     }
     
     /// Деавторизация пользователя

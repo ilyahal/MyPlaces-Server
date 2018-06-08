@@ -22,7 +22,8 @@ extension User {
         
         // MARK: - Инициализация
         
-        init(name: String, username: String, email: String, photoUrl: String?) {
+        init(id: UUID?, name: String, username: String, email: String, photoUrl: String?) {
+            self.id = id
             self.name = name
             self.username = username
             self.email = email
@@ -45,8 +46,3 @@ extension User.Public: MySQLUUIDModel {
 // MARK: - Content
 
 extension User.Public: Content { }
-
-
-// MARK: - Parameter
-
-extension User.Public: Parameter { }
