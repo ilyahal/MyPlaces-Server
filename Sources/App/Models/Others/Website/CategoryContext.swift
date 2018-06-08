@@ -4,7 +4,6 @@ struct CategoryContext: Context {
     
     // MARK: - Публичные свойства
     
-    let title: String
     /// Категория
     let category: Category
     /// Места

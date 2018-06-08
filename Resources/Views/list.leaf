@@ -2,17 +2,17 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Главная</a></li>
-            <li class="breadcrumb-item active" aria-current="page">#(list.title)</li>
+            <li class="breadcrumb-item active" aria-current="page">#(data.list.title)</li>
         </ol>
     </nav>
     <div class="mb-3">
-        <h1 class="d-inline">#(list.title)</h1>
+        <h1 class="d-inline">#(data.list.title)</h1>
         <div class="mt-2 mb-3 float-right">
-            <a role="button" class="btn btn-primary mr-1" href="/lists/#(list.id)/edit">Изменить</a>
-            <a role="button" class="btn btn-success" href="/lists/#(list.id)/places/create">+</a>
+            <a role="button" class="btn btn-primary mr-1" href="/lists/#(data.list.id)/edit">Изменить</a>
+            <a role="button" class="btn btn-success" href="/lists/#(data.list.id)/places/create">+</a>
         </div>
     </div>
-    #if(count(places) > 0) {
+    #if(count(data.places) > 0) {
         <table class="table table-bordered bg-white">
             <thead class="thead-light">
                 <tr>
@@ -22,13 +22,13 @@
                </tr>
             </thead>
             <tbody>
-                #for(place in places) {
+                #for(place in data.places) {
                     <tr>
-                        <td class="align-middle"><a href="/lists/#(list.id)/places/#(place.id)">#(place.title)</a></td>
+                        <td class="align-middle"><a href="/lists/#(data.list.id)/places/#(place.id)">#(place.title)</a></td>
                         <td class="align-middle">#(place.description)</td>
                         <td>
-                            <form method="post" action="/lists/#(list.id)/places/#(place.id)/delete">
-                                <a role="button" class="btn btn-primary mr-1" href="/lists/#(list.id)/places/#(place.id)/edit">Изменить</a>
+                            <form method="post" action="/lists/#(data.list.id)/places/#(place.id)/delete">
+                                <a role="button" class="btn btn-primary mr-1" href="/lists/#(data.list.id)/places/#(place.id)/edit">Изменить</a>
                                 <input class="btn btn-danger" type="submit" value="Удалить">
                             </form>
                         </td>

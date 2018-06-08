@@ -3,22 +3,22 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/">Главная</a></li>
             <li class="breadcrumb-item"><a href="/users">Пользователи</a></li>
-            <li class="breadcrumb-item"><a href="/users/#(user.id)">#(user.username)</a></li>
-            <li class="breadcrumb-item active" aria-current="page">#(place.title)</li>
+            <li class="breadcrumb-item"><a href="/users/#(data.user.id)">#(data.user.username)</a></li>
+            <li class="breadcrumb-item active" aria-current="page">#(data.place.title)</li>
         </ol>
     </nav>
     <div class="mb-3">
-        <h1>#(place.title)</h1>
+        <h1>#(data.place.title)</h1>
     </div>
-    <div class="rounded box-shadow mb-3" latitude="#(place.latitude)" longitude="#(place.longitude)" id="map"></div>
+    <div class="rounded box-shadow mb-3" latitude="#(data.place.latitude)" longitude="#(data.place.longitude)" id="map"></div>
     <div class="bg-white rounded box-shadow custom-form">
-        #if(place.description) {
-            <h4 class="text-muted">#(place.description)</h4>
+        #if(data.place.description) {
+            <h4 class="text-muted">#(data.place.description)</h4>
         }
-        #if(count(categories) > 0) {
+        #if(count(data.categories) > 0) {
             <h3>Категории</h3>
             <ul>
-                #for(category in categories) {
+                #for(category in data.categories) {
                     <li><a href="/categories/#(category.id)">#(category.title)</a></li>
                 }
             </ul>

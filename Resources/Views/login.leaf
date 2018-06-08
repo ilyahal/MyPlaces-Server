@@ -12,7 +12,7 @@
         </div>
 
         <button type="submit" class="btn btn-lg btn-primary btn-block">Войти</button>
-        <a role="button" class="btn btn-lg btn-outline-dark btn-block" href="/registration">Регистрация</a>
+        <a role="button" class="btn btn-lg btn-outline-secondary btn-block" href="/registration">Регистрация</a>
     </form>
 }
 

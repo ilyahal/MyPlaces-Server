@@ -1,12 +1,9 @@
 
 /// Данные для отображения на главной странице
-struct IndexContext: Context {
+struct IndexContext: Encodable {
     
     // MARK: - Публичные свойства
     
-    let title: String
-    /// Индекс активного элемента меню
-    let navActiveItemIndex: Int
     /// Списки
     let lists: [List]
     

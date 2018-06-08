@@ -4,7 +4,6 @@ struct UserContext: Context {
     
     // MARK: - Публичные свойства
     
-    let title: String
     /// Пользователь
     let user: User
     /// Места

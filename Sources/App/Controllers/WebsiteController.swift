@@ -98,8 +98,10 @@ private extension WebsiteController {
     
     /// Страница авторизации
     func loginHandler(_ request: Request) throws -> Future<View> {
-        let context = LoginContext(title: "Вход")
-        return try request.view().render("login", context)
+        let context = LoginContext()
+        let container = ContextContainer(title: "Вход", data: context, on: request)
+        
+        return try request.view().render("login", container)
     }
     
     /// Обработчик страницы авторизации
@@ -115,8 +117,10 @@ private extension WebsiteController {
     
     /// Страница регистрации
     func registrationHandler(_ request: Request) throws -> Future<View> {
-        let context = RegistrationContext(title: "Регистрация")
-        return try request.view().render("registration", context)
+        let context = RegistrationContext()
+        let container = ContextContainer(title: "Регистрация", data: context, on: request)
+        
+        return try request.view().render("registration", container)
     }
     
     /// Обработчик страницы регистрации
@@ -137,15 +141,19 @@ private extension WebsiteController {
     func indexHandler(_ request: Request) throws -> Future<View> {
         let user = try request.requireAuthenticated(User.self)
         return try user.lists.query(on: request).all().flatMap(to: View.self) { lists in
-            let context = IndexContext(title: "Главная", navActiveItemIndex: 1, lists: lists)
-            return try request.view().render("index", context)
+            let context = IndexContext(lists: lists)
+            let container = ContextContainer(title: "Главная", navActiveItemIndex: 1, data: context, on: request)
+            
+            return try request.view().render("index", container)
         }
     }
     
     /// Страница создания списка
     func createListHandler(_ request: Request) throws -> Future<View> {
-        let context = CreateListContext(title: "Создание списка")
-        return try request.view().render("createList", context)
+        let context = CreateListContext()
+        let container = ContextContainer(title: "Создание списка", data: context, on: request)
+        
+        return try request.view().render("createList", container)
     }
     
     /// Обработчик формы создания списка
@@ -164,8 +172,10 @@ private extension WebsiteController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            let context = EditListContext(title: "Изменение списка", list: list)
-            return try request.view().render("editList", context)
+            let context = EditListContext(list: list)
+            let container = ContextContainer(title: "Изменение списка", data: context, on: request)
+            
+            return try request.view().render("editList", container)
         }
     }
     
@@ -200,8 +210,10 @@ private extension WebsiteController {
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
             return try list.places.query(on: request).all().flatMap(to: View.self) { places in
-                let context = ListContext(title: list.title, list: list, places: places)
-                return try request.view().render("list", context)
+                let context = ListContext(list: list, places: places)
+                let container = ContextContainer(title: list.title, data: context, on: request)
+                
+                return try request.view().render("list", container)
             }
         }
     }
@@ -212,8 +224,10 @@ private extension WebsiteController {
             let user = try request.requireAuthenticated(User.self)
             guard list.userID == user.id else { throw Abort(.forbidden) }
             
-            let context = CreatePlaceContext(title: "Создание места", list: list)
-            return try request.view().render("createPlace", context)
+            let context = CreatePlaceContext(list: list)
+            let container = ContextContainer(title: "Создание места", data: context, on: request)
+            
+            return try request.view().render("createPlace", container)
         }
     }
     
@@ -246,8 +260,10 @@ private extension WebsiteController {
             guard place.userID == user.id else { throw Abort(.forbidden) }
             
             return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                let context = EditPlaceContext(title: "Изменение места", list: list, place: place, categories: categories)
-                return try request.view().render("editPlace", context)
+                let context = EditPlaceContext(list: list, place: place, categories: categories)
+                let container = ContextContainer(title: "Изменение места", data: context, on: request)
+                
+                return try request.view().render("editPlace", container)
             }
         }
     }
@@ -314,8 +330,10 @@ private extension WebsiteController {
             guard place.userID == user.id else { throw Abort(.forbidden) }
             
             return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                let context = PlaceContext(title: place.title, list: list, place: place, categories: categories)
-                return try request.view().render("place", context)
+                let context = PlaceContext(list: list, place: place, categories: categories)
+                let container = ContextContainer(title: place.title, data: context, on: request)
+                
+                return try request.view().render("place", container)
             }
         }
     }
@@ -323,8 +341,10 @@ private extension WebsiteController {
     /// Страница с категориями
     func categoriesHandler(_ request: Request) throws -> Future<View> {
         return Category.query(on: request).all().flatMap(to: View.self) { categories in
-            let context = CategoriesContext(title: "Категории", navActiveItemIndex: 2, categories: categories)
-            return try request.view().render("categories", context)
+            let context = CategoriesContext(categories: categories)
+            let container = ContextContainer(title: "Категории", navActiveItemIndex: 2, data: context, on: request)
+            
+            return try request.view().render("categories", container)
         }
     }
     
@@ -340,8 +360,10 @@ private extension WebsiteController {
                 or.filter(publicFilter)
                 or.filter(selfPlaceFilter)
             }.all().flatMap(to: View.self) { places in
-                let context = CategoryContext(title: category.title, category: category, places: places)
-                return try request.view().render("category", context)
+                let context = CategoryContext(category: category, places: places)
+                let container = ContextContainer(title: category.title, data: context, on: request)
+                
+                return try request.view().render("category", container)
             }
         }
     }
@@ -355,8 +377,10 @@ private extension WebsiteController {
             }
             
             return try flatMap(to: View.self, place.categories.query(on: request).all(), place.user.get(on: request)) { categories, placeCreator in
-                let context = CategoryPlaceContext(title: place.title, category: category, place: place, categories: categories, user: placeCreator)
-                return try request.view().render("categoryPlace", context)
+                let context = CategoryPlaceContext(category: category, place: place, categories: categories, user: placeCreator)
+                let container = ContextContainer(title: place.title, data: context, on: request)
+                
+                return try request.view().render("categoryPlace", container)
             }
         }
     }
@@ -364,8 +388,10 @@ private extension WebsiteController {
     /// Страница с пользователями
     func usersHandler(_ request: Request) throws -> Future<View> {
         return User.query(on: request).all().flatMap(to: View.self) { users in
-            let context = UsersContext(title: "Пользователи", navActiveItemIndex: 3, users: users)
-            return try request.view().render("users", context)
+            let context = UsersContext(users: users)
+            let container = ContextContainer(title: "Пользователи", navActiveItemIndex: 3, data: context, on: request)
+            
+            return try request.view().render("users", container)
         }
     }
     
@@ -374,8 +400,10 @@ private extension WebsiteController {
         return try request.parameters.next(User.self).flatMap(to: View.self) { user in
             let publicFilter: ModelFilter<Place> = try \.isPublic == true
             return try user.places.query(on: request).filter(publicFilter).all().flatMap(to: View.self) { places in
-                let context = UserContext(title: user.username, user: user, places: places)
-                return try request.view().render("user", context)
+                let context = UserContext(user: user, places: places)
+                let container = ContextContainer(title: user.username, data: context, on: request)
+                
+                return try request.view().render("user", container)
             }
         }
     }
@@ -383,9 +411,11 @@ private extension WebsiteController {
     /// Страница профиля
     func profileHandler(_ request: Request) throws -> Future<View> {
         let user = try request.requireAuthenticated(User.self)
-        let context = ProfileContext(title: "Профиль", user: user)
         
-        return try request.view().render("profile", context)
+        let context = ProfileContext(user: user)
+        let container = ContextContainer(title: "Профиль", data: context, on: request)
+        
+        return try request.view().render("profile", container)
     }
     
     /// Страница места пользователя
@@ -396,8 +426,10 @@ private extension WebsiteController {
             }
             
             return try place.categories.query(on: request).all().flatMap(to: View.self) { categories in
-                let context = UserPlaceContext(title: place.title, user: user, place: place, categories: categories)
-                return try request.view().render("userPlace", context)
+                let context = UserPlaceContext(user: user, place: place, categories: categories)
+                let container = ContextContainer(title: place.title, data: context, on: request)
+                
+                return try request.view().render("userPlace", container)
             }
         }
     }

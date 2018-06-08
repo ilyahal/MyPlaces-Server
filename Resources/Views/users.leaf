@@ -16,7 +16,7 @@
            </tr>
         </thead>
         <tbody>
-            #for(user in users) {
+            #for(user in data.users) {
                 <tr>
                     <td class="align-middle"><a href="/users/#(user.id)">#(user.username)</a></td>
                     <td class="align-middle">#(user.name)</td>
