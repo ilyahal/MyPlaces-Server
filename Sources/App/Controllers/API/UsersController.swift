@@ -56,6 +56,8 @@ private extension UsersController {
     
     /// Создание пользователя
     func createHandler(_ request: Request, data: UserCreateData) throws -> Future<User.Public> {
+        try data.validate()
+        
         let password = try BCrypt.hash(data.password)
         let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
         

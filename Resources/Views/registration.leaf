@@ -2,17 +2,23 @@
     <form method="post" class="text-center bg-white rounded box-shadow form-signin">
         <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
 
+        #if(data.registrationError) {
+            <div class="alert alert-danger" role="alert">
+                Произошла ошибка. Данные введены некорректно.
+            </div>
+        }
+
         <div class="form-group">
             <label for="inputName" class="sr-only">ФИО</label>
-            <input type="text" name="name" class="form-control" id="inputName" placeholder="ФИО" required autofocus>
+            <input type="text" name="name" #if(data.name){value="#(data.name)"} class="form-control" id="inputName" placeholder="ФИО" required autofocus>
         </div>
         <div class="form-group">
             <label for="inputEmail" class="sr-only">Email</label>
-            <input type="email" name="email" class="form-control" id="inputEmail" placeholder="Email" required>
+            <input type="email" name="email" #if(data.email){value="#(data.email)"} class="form-control" id="inputEmail" placeholder="Email" required>
         </div>
         <div class="form-group">
             <label for="inputUsername" class="sr-only">Имя пользователя</label>
-            <input type="text" name="username" class="form-control" id="inputUsername" placeholder="Имя пользователя" required>
+            <input type="text" name="username" #if(data.username){value="#(data.username)"} class="form-control" id="inputUsername" placeholder="Имя пользователя" required>
         </div>
         <div class="form-group">
             <label for="inputPassword" class="sr-only">Пароль</label>

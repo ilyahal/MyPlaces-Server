@@ -120,7 +120,12 @@ private extension WebsiteController {
     
     /// Страница регистрации
     func registrationHandler(_ request: Request) throws -> Future<View> {
-        let context = RegistrationContext()
+        let name = request.query[String.self, at: "name"]
+        let email = request.query[String.self, at: "email"]
+        let username = request.query[String.self, at: "username"]
+        let registrationError = request.query[Bool.self, at: "error"] ?? false
+        
+        let context = RegistrationContext(name: name, email: email, username: username, registrationError: registrationError)
         let container = ContextContainer(title: "Регистрация", data: context, on: request)
         
         return try request.view().render("registration", container)
@@ -128,6 +133,14 @@ private extension WebsiteController {
     
     /// Обработчик страницы регистрации
     func registrationPostHandler(_ request: Request, data: UserCreateData) throws -> Future<Response> {
+        do {
+            try data.validate()
+        } catch {
+            return Future.map(on: request) {
+                request.redirect(to: "/registration?name=\(data.name)&email=\(data.email)&username=\(data.username)&error=true")
+            }
+        }
+        
         let password = try BCrypt.hash(data.password)
         let user = User(name: data.name, username: data.username, password: password, email: data.email, photoUrl: nil)
         
