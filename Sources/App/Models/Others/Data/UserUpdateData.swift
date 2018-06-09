@@ -31,7 +31,7 @@ extension UserUpdateData: Validatable {
     
     static func validations() throws -> Validations<UserUpdateData> {
         var validations = Validations(UserUpdateData.self)
-        try validations.add(\.name, .ascii)
+        try validations.add(\.name, .count(1...))
         try validations.add(\.email, .email)
         
         return validations

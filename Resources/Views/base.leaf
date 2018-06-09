@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -31,6 +31,9 @@
                 </li>
                 <li class="nav-item #if(menuActiveItemIndex == 2){active}">
                     <a href="/users" class="nav-link">Пользователи</a>
+                </li>
+                <li class="nav-item #if(menuActiveItemIndex == 3){active}">
+                    <a href="/recommendations" class="nav-link">Рекомендации</a>
                 </li>
             </ul>
             <form method="post" action="/logout" class="form-inline">

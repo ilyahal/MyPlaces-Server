@@ -1,6 +1,7 @@
 import Vapor
 import Authentication
 import Leaf
+import CoreLocation
 
 /// Сайт
 struct WebsiteController: RouteCollection {
@@ -82,6 +83,11 @@ struct WebsiteController: RouteCollection {
         
         // Страница места из категории
         protectedRoutes.get("users", User.parameter, "places", Place.parameter, use: userPlaceHandler)
+        
+        // Страница рекомендаций
+        protectedRoutes.get("recommendations", use: recommendationsHandler)
+        // Обработчик формы фильтров рекомендаций
+        protectedRoutes.post(RecommendationsWebsiteData.self, at: "recommendations", use: recommendationsPostHandler)
         
         // Страница профиля
         protectedRoutes.get("profile", use: profileHandler)
@@ -182,7 +188,9 @@ private extension WebsiteController {
         let description = (data.description ?? "").isEmpty ? nil : data.description
         let list = try List(title: data.title, description: description, dateInsert: Date(), userID: user.requireID())
         
-        return list.save(on: request).transform(to: request.redirect(to: "/"))
+        return list.save(on: request).map(to: Response.self) { savedList in
+            return try request.redirect(to: "/lists/\(savedList.requireID())")
+        }
     }
     
     /// Страница редактирования списка
@@ -208,7 +216,7 @@ private extension WebsiteController {
             list.description = (data.description ?? "").isEmpty ? nil : data.description
             list.dateUpdate = Date()
             
-            return list.save(on: request).transform(to: request.redirect(to: "/"))
+            return try list.save(on: request).transform(to: request.redirect(to: "/lists/\(list.requireID())"))
         }
     }
     
@@ -265,7 +273,7 @@ private extension WebsiteController {
                     saves.append(savePivot)
                 }
                 
-                return saves.flatten(on: request).transform(to: request.redirect(to: "/lists/\(savedPlace.listID)"))
+                return try saves.flatten(on: request).transform(to: request.redirect(to: "/lists/\(savedPlace.listID)/places/\(savedPlace.requireID())"))
             }
         }
     }
@@ -439,6 +447,37 @@ private extension WebsiteController {
                 let container = ContextContainer(title: place.title, data: context, on: request)
                 
                 return try request.view().render("userPlace", container)
+            }
+        }
+    }
+    
+    /// Получить страницу рекомендаций
+    func getRecommendationsView(with places: [Place]?, on request: Request) throws -> Future<View> {
+        return Category.query(on: request).all().flatMap(to: View.self) { categories in
+            let context = RecommendationsContext(categories: categories, places: places)
+            let container = ContextContainer(title: "Рекомендации", menuActiveItemIndex: 3, data: context, on: request)
+            
+            return try request.view().render("recommendations", container)
+        }
+    }
+    
+    /// Страница рекомендаций
+    func recommendationsHandler(_ request: Request) throws -> Future<View> {
+        return try getRecommendationsView(with: nil, on: request)
+    }
+    
+    /// Обработчик формы фильтров рекомендаций
+    func recommendationsPostHandler(_ request: Request, data: RecommendationsWebsiteData) throws -> Future<View> {
+        let user = try request.requireAuthenticated(User.self)
+        let target = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
+        let distanceInMeters = data.distance * 1000
+        let includeOwned = data.includeOwned != nil
+        let categoryId = Int(data.category) ?? -1
+        
+        return try Category.find(categoryId, on: request).flatMap(to: View.self) { category in
+            let recommendationsService = try request.make(RecommendationsService.self)
+            return try recommendationsService.getRecommendations(for: user, target: target, distanceInMeters: distanceInMeters, category: category, includeOwned: includeOwned, on: request).flatMap(to: View.self) { recommendedPlaces in
+                return try self.getRecommendationsView(with: recommendedPlaces, on: request)
             }
         }
     }

@@ -43,8 +43,8 @@ public func configure(_ config: inout Config, _ environment: inout Environment, 
     services.register(migrations)
     
     // Register custom services
-    let settingsService = SettingsService()
-    services.register(settingsService)
+    services.register(SettingsService())
+    services.register(RecommendationsService())
 
     // Register routes to the router
     let router = EngineRouter.default()

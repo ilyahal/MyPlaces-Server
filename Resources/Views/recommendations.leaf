@@ -1,0 +1,83 @@
+#set("content") {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Главная</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Рекомендации</li>
+        </ol>
+    </nav>
+    <div class="mb-3">
+        <h1 class="d-inline">Рекомендации</h1>
+        <button class="btn btn-primary mt-2 mb-3 float-right" type="button" data-toggle="collapse" data-target="#recommendationsFilters" aria-expanded="false" aria-controls="recommendationsFilters">Фильтры</button>
+    </div>
+    <div class="collapse" id="recommendationsFilters">
+        <form method="post" class="bg-white rounded box-shadow custom-form">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="geolocationLatitude">Широта</label>
+                    <input type="text" name="latitude" class="form-control" id="geolocationLatitude" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="geolocationLongitude">Долгота</label>
+                    <input type="text" name="longitude" class="form-control" id="geolocationLongitude" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-8">
+                    <label for="recommendationsCategory">Категория</label>
+                    <select name="category" class="form-control" id="recommendationsCategory">
+                        <option value="">Выберите</option>
+                        #if(count(data.categories) > 0) {
+                            #for(category in data.categories) {
+                                <option value="#(category.id)">#(category.title)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="recommendationsDistance">Дистанция</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">км</span>
+                        </div>
+                        <input type="text" name="distance" class="form-control" id="recommendationsDistance" required>
+                    </div>
+                </div>
+            </div>
+            <div class="form-check mb-3">
+                <input type="checkbox" name="includeOwned" value="" class="form-check-input" id="recommendationsIncludeOwned" checked>
+                <label class="form-check-label" for="recommendationsIncludeOwned">Отображать собственные места</label>
+            </div>
+            <button type="submit" class="btn btn-primary mr-1">Подобрать</button>
+            <a class="btn btn-outline-secondary" id="getGeolocationButton" href="#">Определить геопозицию</a>
+        </form>
+    </div>
+    #if(count(data.places) > 0) {
+        <table class="table table-bordered bg-white">
+            <thead class="thead-light">
+                <tr>
+                    <th width="300px">Название</th>
+                    <th>Описание</th>
+               </tr>
+            </thead>
+            <tbody>
+                #for(place in data.places) {
+                    <tr>
+                        <td class="align-middle"><a href="/users/#(data.user.id)/places/#(place.id)">#(place.title)</a></td>
+                        <td class="align-middle">#(place.description)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    } else {
+        <div class="jumbotron">
+            <h1 class="display-4">Необходимо настроить фильтры.</h1>
+            <p class="lead">Для отображения рекомендаций необходимо настроить фильтры</p>
+        </div>
+    }
+}
+
+#set("scripts") {
+    <script src="/scripts/geolocation.js"></script>
+}
+
+#embed("base")

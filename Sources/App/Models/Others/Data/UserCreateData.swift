@@ -33,7 +33,7 @@ extension UserCreateData: Validatable {
     
     static func validations() throws -> Validations<UserCreateData> {
         var validations = Validations(UserCreateData.self)
-        try validations.add(\.name, .ascii)
+        try validations.add(\.name, .count(1...))
         try validations.add(\.email, .email)
         try validations.add(\.username, .alphanumeric && .count(3...))
         try validations.add(\.password, .alphanumeric && .count(6...))
