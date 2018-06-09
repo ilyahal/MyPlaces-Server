@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице создания места
-struct CreatePlaceContext: Context {
+struct CreatePlaceContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -8,3 +8,8 @@ struct CreatePlaceContext: Context {
     let list: List
     
 }
+
+
+// MARK: - Context
+
+extension CreatePlaceContext: Context { }

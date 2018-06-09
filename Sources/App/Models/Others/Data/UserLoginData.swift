@@ -1,7 +1,9 @@
 import Vapor
 
 /// Информация о попытке входа пользователя
-struct UserLoginData: Content {
+struct UserLoginData: Codable {
+    
+    // MARK: - Публичные свойства
     
     /// Никнейм
     let username: String
@@ -9,3 +11,8 @@ struct UserLoginData: Content {
     let password: String
     
 }
+
+
+// MARK: - Content
+
+extension UserLoginData: Content { }

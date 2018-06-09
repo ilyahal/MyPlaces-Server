@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице регистрации
-struct RegistrationContext: Context {
+struct RegistrationContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -14,3 +14,8 @@ struct RegistrationContext: Context {
     let registrationError: Bool
     
 }
+
+
+// MARK: - Context
+
+extension RegistrationContext: Context { }

@@ -8,3 +8,8 @@ struct IndexContext: Encodable {
     let lists: [List]
     
 }
+
+
+// MARK: - Context
+
+extension IndexContext: Context { }

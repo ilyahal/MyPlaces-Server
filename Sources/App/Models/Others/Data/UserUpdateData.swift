@@ -1,7 +1,9 @@
 import Vapor
 
 /// Измененная информация о пользователе
-struct UserUpdateData: Content {
+struct UserUpdateData: Codable {
+    
+    // MARK: - Публичные свойства
     
     /// Имя
     let name: String
@@ -11,6 +13,11 @@ struct UserUpdateData: Content {
     let photoName: String?
     
 }
+
+
+// MARK: - Content
+
+extension UserUpdateData: Content { }
 
 
 // MARK: - Reflectable

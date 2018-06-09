@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице редактирования списка
-struct EditListContext: Context {
+struct EditListContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -8,3 +8,8 @@ struct EditListContext: Context {
     let list: List
     
 }
+
+
+// MARK: - Context
+
+extension EditListContext: Context { }

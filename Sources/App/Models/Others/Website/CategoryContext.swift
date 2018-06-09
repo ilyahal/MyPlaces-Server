@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице со списком мест из категории
-struct CategoryContext: Context {
+struct CategoryContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -10,3 +10,8 @@ struct CategoryContext: Context {
     let places: [Place]
     
 }
+
+
+// MARK: - Context
+
+extension CategoryContext: Context { }

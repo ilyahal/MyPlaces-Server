@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице профиля
-struct ProfileContext: Context {
+struct ProfileContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -14,3 +14,8 @@ struct ProfileContext: Context {
     let profileError: Bool
     
 }
+
+
+// MARK: - Context
+
+extension ProfileContext: Context { }

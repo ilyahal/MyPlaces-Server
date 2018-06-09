@@ -1,7 +1,7 @@
 import Vapor
 
 /// Контейнер для отображаемых данных на веб-странице
-struct ContextContainer<T>: Context where T: Context {
+struct ContextContainer<T>: Encodable where T: Context {
     
     // MARK: - Публичные свойства
     

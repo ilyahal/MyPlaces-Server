@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице списка
-struct ListContext: Context {
+struct ListContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -10,3 +10,8 @@ struct ListContext: Context {
     let places: [Place]
     
 }
+
+
+// MARK: - Context
+
+extension ListContext: Context { }

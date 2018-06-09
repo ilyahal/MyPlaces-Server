@@ -1,3 +1,8 @@
 
 /// Данные для отображения на странице создания списка
-struct CreateListContext: Context { }
+struct CreateListContext: Encodable { }
+
+
+// MARK: - Context
+
+extension CreateListContext: Context { }

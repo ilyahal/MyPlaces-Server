@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице со списком мест пользователя
-struct UserContext: Context {
+struct UserContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -10,3 +10,8 @@ struct UserContext: Context {
     let places: [Place]
     
 }
+
+
+// MARK: - Context
+
+extension UserContext: Context { }

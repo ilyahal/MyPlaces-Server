@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице с пользователями
-struct UsersContext: Context {
+struct UsersContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -8,3 +8,8 @@ struct UsersContext: Context {
     let users: [User]
     
 }
+
+
+// MARK: - Context
+
+extension UsersContext: Context { }

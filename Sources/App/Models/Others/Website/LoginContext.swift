@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице авторизации
-struct LoginContext: Context {
+struct LoginContext: Encodable {
     
     /// Никнейм
     var username: String?
@@ -8,3 +8,8 @@ struct LoginContext: Context {
     let loginError: Bool
     
 }
+
+
+// MARK: - Context
+
+extension LoginContext: Context { }

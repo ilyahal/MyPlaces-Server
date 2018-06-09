@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице редактирования места
-struct EditPlaceContext: Context {
+struct EditPlaceContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -12,3 +12,8 @@ struct EditPlaceContext: Context {
     let categories: [Category]
     
 }
+
+
+// MARK: - Context
+
+extension EditPlaceContext: Context { }

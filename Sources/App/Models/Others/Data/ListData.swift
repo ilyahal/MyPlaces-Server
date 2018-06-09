@@ -1,7 +1,9 @@
 import Vapor
 
 /// Информация о списке
-struct ListData: Content {
+struct ListData: Codable {
+    
+    // MARK: - Публичные свойства
     
     /// Название
     let title: String
@@ -9,3 +11,8 @@ struct ListData: Content {
     let description: String?
     
 }
+
+
+// MARK: - Content
+
+extension ListData: Content { }

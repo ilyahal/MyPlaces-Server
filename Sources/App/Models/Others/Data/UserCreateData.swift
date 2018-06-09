@@ -1,7 +1,9 @@
 import Vapor
 
 /// Информация о пользователе
-struct UserCreateData: Content {
+struct UserCreateData: Codable {
+    
+    // MARK: - Публичные свойства
     
     /// Имя
     let name: String
@@ -13,6 +15,11 @@ struct UserCreateData: Content {
     let password: String
     
 }
+
+
+// MARK: - Content
+
+extension UserCreateData: Content { }
 
 
 // MARK: - Reflectable

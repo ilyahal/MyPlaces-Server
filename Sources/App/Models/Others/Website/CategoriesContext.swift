@@ -1,6 +1,6 @@
 
 /// Данные для отображения на странице с категориями
-struct CategoriesContext: Context {
+struct CategoriesContext: Encodable {
     
     // MARK: - Публичные свойства
     
@@ -8,3 +8,8 @@ struct CategoriesContext: Context {
     let categories: [Category]
     
 }
+
+
+// MARK: - Context
+
+extension CategoriesContext: Context { }

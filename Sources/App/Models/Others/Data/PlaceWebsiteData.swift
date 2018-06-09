@@ -1,7 +1,9 @@
 import Vapor
 
 /// Информация о месте при работе с сайтом
-struct PlaceWebsiteData: Content {
+struct PlaceWebsiteData: Codable {
+    
+    // MARK: - Публичные свойства
     
     /// Название
     let title: String
@@ -17,3 +19,8 @@ struct PlaceWebsiteData: Content {
     let categories: [String]?
     
 }
+
+
+// MARK: - Content
+
+extension PlaceWebsiteData: Content { }
