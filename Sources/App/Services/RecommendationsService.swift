@@ -161,10 +161,25 @@ private extension RecommendationsService {
     
     /// Рассчитать коэффициенты для места
     func calculateCoefficients(for placeInfo: PlaceInfo, categoriesIds: Set<Category.ID>, distance: CLLocationDistance, maximumDistanceToCenter: CLLocationDistance) -> PlaceCoefficients {
-        let distanceToCenter = placeInfo.distanceToCenter / maximumDistanceToCenter
-        let categoriesCoincidence = Double(categoriesIds.subtracting(placeInfo.categoriesIds).count) / Double(categoriesIds.count)
+        let distanceToCenter: Double
+        if maximumDistanceToCenter == 0 {
+            distanceToCenter = 0
+        } else {
+            distanceToCenter = placeInfo.distanceToCenter / maximumDistanceToCenter
+        }
+        let categoriesCoincidence: Double
+        if categoriesIds.count == 0 {
+            categoriesCoincidence = 0
+        } else {
+            categoriesCoincidence = Double(categoriesIds.subtracting(placeInfo.categoriesIds).count) / Double(categoriesIds.count)
+        }
         let owned: Double = placeInfo.isOwned ? 0 : 1
-        let distanceToTarget = placeInfo.distanceToTarget / distance
+        let distanceToTarget: Double
+        if distance == 0 {
+            distanceToTarget = 0
+        } else {
+            distanceToTarget = placeInfo.distanceToTarget / distance
+        }
         
         return PlaceCoefficients(place: placeInfo.place, distanceToCenter: distanceToCenter, categoriesCoincidence: categoriesCoincidence, owned: owned, distanceToTarget: distanceToTarget)
     }
