@@ -65,7 +65,16 @@ extension Category: MySQLModel { }
 
 // MARK: - Migration
 
-extension Category: Migration { }
+extension Category: Migration {
+    
+    static func prepare(on connection: MySQLConnection) -> Future<Void> {
+        return Database.create(self, on: connection) { builder in
+            try addProperties(to: builder)
+            try builder.addIndex(to: \.title, isUnique: true)
+        }
+    }
+    
+}
 
 
 // MARK: - Content
