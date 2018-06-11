@@ -16,7 +16,7 @@ struct CategoriesController: RouteCollection {
         // Получение категории
         categoriesRoutes.get(Category.parameter, use: getHandler)
         // Создание категории
-        categoriesRoutes.post(Category.self, use: createHandler)
+        categoriesRoutes.post(CategoryData.self, use: createHandler)
         
         // Группа методов, защищенных входом по токену
         let tokenAuthMiddleware = User.tokenAuthMiddleware()
@@ -45,7 +45,8 @@ private extension CategoriesController {
     }
     
     /// Создание категории
-    func createHandler(_ request: Request, category: Category) throws -> Future<Category> {
+    func createHandler(_ request: Request, data: CategoryData) throws -> Future<Category> {
+        let category = Category(title: data.title, dateInsert: Date())
         return category.save(on: request)
     }
     
