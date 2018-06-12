@@ -28,6 +28,8 @@ struct PlacesController: RouteCollection {
         tokenAuthGroup.put(PlaceData.self, at: Place.parameter, use: updateHandler)
         // Удаление места
         tokenAuthGroup.delete(Place.parameter, use: deleteHandler)
+        // Поиск по местам
+        tokenAuthGroup.get("search", use: searchHandler)
     }
     
 }
@@ -147,6 +149,21 @@ private extension PlacesController {
 
             return try Place.deletePlace(place, on: request).transform(to: .ok)
         }
+    }
+    
+    /// Поиск мест
+    func searchHandler(_ request: Request) throws -> Future<[Place]> {
+        let user = try request.requireAuthenticated(User.self)
+        guard let searchTerm = request.query[String.self, at: "term"] else { throw Abort(.badRequest, reason: "Missing search term in request") }
+        
+        let publicFilter: ModelFilter<Place> = try \.isPublic == true
+        let selfPlaceFilter: ModelFilter<Place> = try \.userID == user.id
+        let searchTermFilter: ModelFilter<Place> = try \.title == searchTerm
+        
+        return Place.query(on: request).group(.or) { or in
+            or.filter(publicFilter)
+            or.filter(selfPlaceFilter)
+        }.filter(searchTermFilter).all()
     }
     
 }
