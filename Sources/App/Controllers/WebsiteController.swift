@@ -468,13 +468,14 @@ private extension WebsiteController {
     
     /// Обработчик формы фильтров рекомендаций
     func recommendationsPostHandler(_ request: Request, data: RecommendationsWebsiteData) throws -> Future<View> {
-        let user = try request.requireAuthenticated(User.self)
-        let target = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
-        let distanceInMeters = data.distance * 1000
-        let includeOwned = data.includeOwned != nil
         let categoryId = Int(data.category) ?? -1
         
         return try Category.find(categoryId, on: request).flatMap(to: View.self) { category in
+            let user = try request.requireAuthenticated(User.self)
+            let target = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
+            let distanceInMeters = data.distance * 1000
+            let includeOwned = data.includeOwned != nil
+            
             let recommendationsService = try request.make(RecommendationsService.self)
             return try recommendationsService.getRecommendations(for: user, target: target, distanceInMeters: distanceInMeters, category: category, includeOwned: includeOwned, on: request).flatMap(to: View.self) { recommendedPlaces in
                 return try self.getRecommendationsView(with: recommendedPlaces, on: request)
