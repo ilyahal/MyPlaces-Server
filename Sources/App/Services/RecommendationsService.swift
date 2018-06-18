@@ -1,4 +1,3 @@
-import GLKit
 import Vapor
 import Fluent
 
@@ -85,8 +84,8 @@ private extension RecommendationsService {
         var z: Float = 0
         
         for coordinate in coordinates {
-            let latitude = GLKMathDegreesToRadians(Float(coordinate.latitude))
-            let longitude = GLKMathDegreesToRadians(Float(coordinate.longitude))
+            let latitude = Float(deg2rad(coordinate.latitude))
+            let longitude = Float(deg2rad(coordinate.longitude))
             
             x += cos(latitude) * cos(longitude)
             y += cos(latitude) * sin(longitude)
@@ -102,8 +101,8 @@ private extension RecommendationsService {
         let hypersphericalCoordinateSystem = sqrt(x * x + y * y)
         let latitude = atan2(z, hypersphericalCoordinateSystem)
         
-        let resultLatitude = LocationDegrees(GLKMathRadiansToDegrees(Float(latitude)))
-        let resultLongitude = LocationDegrees(GLKMathRadiansToDegrees(Float(longitude)))
+        let resultLatitude = LocationDegrees(rad2deg(Double(latitude)))
+        let resultLongitude = LocationDegrees(rad2deg(Double(longitude)))
         let result = LocationCoordinate2D(latitude: resultLatitude, longitude: resultLongitude)
         
         return result
