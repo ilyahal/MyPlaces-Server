@@ -20,7 +20,7 @@ extension SettingsService {
     
     /// Максимальный размер изображения
     var maxFileSize: Int {
-        return 2 * 1024 * 1024
+        return 20 * 1024 * 1024
     }
     
     /// Допустимые типы файлов
@@ -30,7 +30,7 @@ extension SettingsService {
     
     /// URL к папке "files"
     var filesUrl: URL {
-        guard let filesUrl = URL(string: "http://localhost:8080/files/") else { preconditionFailure() }
+        guard let filesUrl = URL(string: "http://5.23.49.21/files/") else { preconditionFailure() }
         return filesUrl
     }
     
