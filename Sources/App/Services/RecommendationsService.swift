@@ -1,4 +1,3 @@
-import CoreLocation
 import GLKit
 import Vapor
 import Fluent
@@ -12,7 +11,7 @@ struct RecommendationsService: Service { }
 extension RecommendationsService {
     
     /// Получить рекомендуемые точки
-    func getRecommendations(for user: User, target coordinate: CLLocationCoordinate2D, distanceInMeters distance: CLLocationDistance, category: Category?, includeOwned: Bool, on request: Request) throws -> Future<[Place]> {
+    func getRecommendations(for user: User, target coordinate: LocationCoordinate2D, distanceInMeters distance: LocationDistance, category: Category?, includeOwned: Bool, on request: Request) throws -> Future<[Place]> {
         
         // Получаем точки пользователя
         return try user.places.query(on: request).all().flatMap(to: [Place].self) { userPlaces in
@@ -70,17 +69,17 @@ extension RecommendationsService {
 private extension RecommendationsService {
     
     /// Получить координаты места
-    func getCoordinate(for place: Place) -> CLLocationCoordinate2D {
-        return CLLocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
+    func getCoordinate(for place: Place) -> LocationCoordinate2D {
+        return LocationCoordinate2D(latitude: place.latitude, longitude: place.longitude)
     }
     
     /// Получить координаты мест
-    func getCoordinates(for places: [Place]) -> [CLLocationCoordinate2D] {
+    func getCoordinates(for places: [Place]) -> [LocationCoordinate2D] {
         return places.map { self.getCoordinate(for: $0) }
     }
     
     /// Получить центральную координату для координат
-    func getCenterCoordinate(for coordinates: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D {
+    func getCenterCoordinate(for coordinates: [LocationCoordinate2D]) -> LocationCoordinate2D {
         var x: Float = 0
         var y: Float = 0
         var z: Float = 0
@@ -103,9 +102,9 @@ private extension RecommendationsService {
         let hypersphericalCoordinateSystem = sqrt(x * x + y * y)
         let latitude = atan2(z, hypersphericalCoordinateSystem)
         
-        let resultLatitude = CLLocationDegrees(GLKMathRadiansToDegrees(Float(latitude)))
-        let resultLongitude = CLLocationDegrees(GLKMathRadiansToDegrees(Float(longitude)))
-        let result = CLLocationCoordinate2D(latitude: resultLatitude, longitude: resultLongitude)
+        let resultLatitude = LocationDegrees(GLKMathRadiansToDegrees(Float(latitude)))
+        let resultLongitude = LocationDegrees(GLKMathRadiansToDegrees(Float(longitude)))
+        let result = LocationCoordinate2D(latitude: resultLatitude, longitude: resultLongitude)
         
         return result
     }
@@ -131,15 +130,21 @@ private extension RecommendationsService {
     }
     
     /// Получить расстояние между координатами
-    func getDistance(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> CLLocationDistance {
-        let fromLocation = CLLocation(latitude: from.latitude, longitude: from.longitude)
-        let toLocation = CLLocation(latitude: to.latitude, longitude: to.longitude)
+    func getDistance(from: LocationCoordinate2D, to: LocationCoordinate2D) -> LocationDistance {
+        let theta = from.longitude - to.longitude
         
-        return fromLocation.distance(from: toLocation)
+        var distance = sin(deg2rad(from.latitude)) * sin(deg2rad(to.latitude)) + cos(deg2rad(from.latitude)) * cos(deg2rad(to.latitude)) * cos(deg2rad(theta))
+        distance = acos(distance)
+        distance = rad2deg(distance)
+        distance *= 60 * 1.1515
+        distance *= 1.609344 // километры
+        distance *= 1000 // метры
+        
+        return distance
     }
     
     /// Подготовка информации о месте
-    func preparePlaceInfo(_ place: Place, target coordinate: CLLocationCoordinate2D, centerCoordinate: CLLocationCoordinate2D, distance: CLLocationDistance, user: User, on request: Request) throws -> Future<PlaceInfo>? {
+    func preparePlaceInfo(_ place: Place, target coordinate: LocationCoordinate2D, centerCoordinate: LocationCoordinate2D, distance: LocationDistance, user: User, on request: Request) throws -> Future<PlaceInfo>? {
         let placeCoordinate = self.getCoordinate(for: place)
         let distanceToTarget = self.getDistance(from: placeCoordinate, to: coordinate)
         let distanceToCenter = self.getDistance(from: placeCoordinate, to: centerCoordinate)
@@ -154,13 +159,13 @@ private extension RecommendationsService {
     }
     
     /// Подготовка информации о местах
-    func processPlaces(_ places: [Place], target coordinate: CLLocationCoordinate2D, centerCoordinate: CLLocationCoordinate2D, distance: CLLocationDistance, user: User, on request: Request) throws -> Future<[PlaceInfo]> {
+    func processPlaces(_ places: [Place], target coordinate: LocationCoordinate2D, centerCoordinate: LocationCoordinate2D, distance: LocationDistance, user: User, on request: Request) throws -> Future<[PlaceInfo]> {
         let prepares = try places.compactMap { try self.preparePlaceInfo($0, target: coordinate, centerCoordinate: centerCoordinate, distance: distance, user: user, on: request) }
         return prepares.flatten(on: request)
     }
     
     /// Рассчитать коэффициенты для места
-    func calculateCoefficients(for placeInfo: PlaceInfo, categoriesIds: Set<Category.ID>, distance: CLLocationDistance, maximumDistanceToCenter: CLLocationDistance) -> PlaceCoefficients {
+    func calculateCoefficients(for placeInfo: PlaceInfo, categoriesIds: Set<Category.ID>, distance: LocationDistance, maximumDistanceToCenter: LocationDistance) -> PlaceCoefficients {
         let distanceToCenter: Double
         if maximumDistanceToCenter == 0 {
             distanceToCenter = 0
@@ -185,7 +190,7 @@ private extension RecommendationsService {
     }
     
     /// Рассчитать коэффициенты для мест
-    func calculateCoefficients(for placesInfo: [PlaceInfo], categoriesIds: Set<Category.ID>, distance: CLLocationDistance) -> [PlaceCoefficients] {
+    func calculateCoefficients(for placesInfo: [PlaceInfo], categoriesIds: Set<Category.ID>, distance: LocationDistance) -> [PlaceCoefficients] {
         let maximumDistanceToCenter = placesInfo.map { $0.distanceToCenter }.max() ?? 0
         return placesInfo.map { calculateCoefficients(for: $0, categoriesIds: categoriesIds, distance: distance, maximumDistanceToCenter: maximumDistanceToCenter) }
     }

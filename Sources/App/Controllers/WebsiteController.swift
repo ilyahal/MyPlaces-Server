@@ -1,7 +1,6 @@
 import Vapor
 import Authentication
 import Leaf
-import CoreLocation
 
 /// Сайт
 struct WebsiteController: RouteCollection {
@@ -472,7 +471,7 @@ private extension WebsiteController {
         
         return try Category.find(categoryId, on: request).flatMap(to: View.self) { category in
             let user = try request.requireAuthenticated(User.self)
-            let target = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
+            let target = LocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
             let distanceInMeters = data.distance * 1000
             let includeOwned = data.includeOwned != nil
             

@@ -1,5 +1,4 @@
 import Vapor
-import CoreLocation
 
 /// Работа с рекомендациями
 struct RecommendationsController: RouteCollection {
@@ -33,7 +32,7 @@ private extension RecommendationsController {
         
         return try Category.find(categoryId, on: request).flatMap(to: [Place].self) { category in
             let user = try request.requireAuthenticated(User.self)
-            let target = CLLocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
+            let target = LocationCoordinate2D(latitude: data.latitude, longitude: data.longitude)
             let distanceInMeters = data.distance * 1000
             
             let recommendationsService = try request.make(RecommendationsService.self)

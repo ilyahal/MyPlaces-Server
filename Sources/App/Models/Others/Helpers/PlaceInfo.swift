@@ -1,4 +1,3 @@
-import CoreLocation
 
 /// Информация о месте
 struct PlaceInfo {
@@ -8,9 +7,9 @@ struct PlaceInfo {
     /// Место
     let place: Place
     /// Дистанция до указанной точки
-    let distanceToTarget: CLLocationDistance
+    let distanceToTarget: LocationDistance
     /// Дистанция до центральной точки пользовательских мест
-    let distanceToCenter: CLLocationDistance
+    let distanceToCenter: LocationDistance
     /// Категории места
     let categoriesIds: Set<Category.ID>
     /// Место пользователя
